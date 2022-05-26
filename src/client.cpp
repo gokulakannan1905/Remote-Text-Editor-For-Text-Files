@@ -33,10 +33,14 @@ void Client::connectToServer(){
     if(connect(socketfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1){
         //display error to stderr
         std::cerr << "Error in connecting to server" << std::endl;
-        exit(1);
+        return;
     }   
     isConnected = true;
 }
+bool Client::isConnectedToServer(){
+    return isConnected;
+}
+
 void Client::sendDataToServer(std::string data, size_t size){
     //send data to server
     if(send(socketfd, data.c_str(), size, 0) == -1){
@@ -46,13 +50,16 @@ void Client::sendDataToServer(std::string data, size_t size){
     }
 }
 void Client::receiveDataFromServer(){
-    //receive data from server
+    //receive the entire file from server
     char buffer[1024];
     memset(buffer, 0, sizeof(buffer));
-    recv(socketfd, buffer, sizeof(buffer), 0);
-        std::cout << buffer << std::endl;
-        memset(buffer, 0, sizeof(buffer));
-        std::cout << "data received" << std::endl;
+    if(recv(socketfd, buffer, sizeof(buffer), 0) == -1){
+        //display error to stderr
+        std::cerr << "Error in receiving data from server" << std::endl;
+        exit(1);
+    }
+    std::cout << buffer << std::endl;
+
 }
 
 bool Client::authenticateUser(std::string username, std::string password){
@@ -80,6 +87,7 @@ bool Client::authenticateUser(std::string username, std::string password){
     if(std::string(buffer) == "AUTHENTICATED"){
         return true;
     }
+    isConnected = false;
     return false;
 }
 
@@ -115,6 +123,6 @@ void Client::createUser(std::string username, std::string password){
 
 void Client::disconnectClient(){
     //close socket
+    sendDataToServer("bye", strlen("bye"));
     close(socketfd);
-    exit(0);
 }

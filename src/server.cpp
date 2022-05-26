@@ -32,9 +32,7 @@ Server::Server(){
     while(std::getline(file, line)){
         std::stringstream ss(line);
         std::string name, password, dir;
-        std::getline(ss, name, ':');
-        std::getline(ss, password, ':');
-        std::getline(ss, dir, ':');
+        ss >> name >> password >> dir;
         User user(name,password);
         users.push_back(user);
     }
@@ -110,7 +108,6 @@ void Server::sendDataToClient(int client_socketfd, std::string data, size_t size
     if(send(client_socketfd, data.c_str(), size, 0) == -1){
         //display error to stderr
         std::cerr << "Error in sending data to client" << std::endl;
-        exit(1);
     }
 }
 
@@ -181,12 +178,50 @@ void Server::listDirContents(int client_socketfd,std::string directory){
     }
 }
 
-void Server::changeDir(std::string directory){
-    //change directory
-    chdir(directory.c_str());
+void Server::changeDir(std::string new_directory,User* current_user,int client_socketfd){
+    
+    DIR *dir;
+    struct dirent *ent;
+    if ((dir = opendir ((current_user->getDir()).c_str())) != NULL) {
+        while ((ent = readdir (dir)) != NULL)
+        if(ent->d_type == DT_DIR && ent->d_name == new_directory) 
+        {
+            //change directory
+            current_user->changeDir(current_user->getDir() + "/" + new_directory);
+            //send success message to client
+            send(client_socketfd, "DIRECTORY_CHANGED", sizeof("DIRECTORY_CHANGED"), 0);
+            return;
+        }
+        closedir (dir);
+    }
+    //send failure message to client
+    send(client_socketfd, "DIRECTORY_NOT_FOUND", sizeof("DIRECTORY_NOT_FOUND"), 0);
+    
 }
 
-void Server::editLine(int client_socketfd,std::string filename,int line_number){
+void Server::selectFile(std::string &filename,std::string dirname,int client_socketfd){
+    //check whether file exists in current directory
+    DIR *dir;
+    struct dirent *ent;
+    if ((dir = opendir (dirname.c_str())) != NULL){
+        while ((ent = readdir (dir)) != NULL){
+            if(ent->d_type == DT_REG && std::string(ent->d_name) == filename){
+                //set the filename to fully qualified path
+                filename = dirname + "/" + filename;
+                //send success message to client
+                send(client_socketfd, "FILE_SELECTED", sizeof("FILE_SELECTED"), 0);
+                return;
+            }
+        }
+        closedir (dir);
+    }
+    //clear filename
+    filename.clear();
+    //send failure message to client
+    send(client_socketfd, "FILE_NOT_FOUND", sizeof("FILE_NOT_FOUND"), 0);
+}
+
+void Server::editLine(int client_socketfd,std::string dir,std::string filename,int line_number){
     //open file in read mode at line_number line
     std::ifstream file(filename);
     if(!file.is_open()){
@@ -202,12 +237,39 @@ void Server::editLine(int client_socketfd,std::string filename,int line_number){
             //send line to client
             send(client_socketfd, line.c_str(), strlen(line.c_str()), 0);
             file.close();
-            return;
+            break;
         }
         i++;
     }
     //send error message to client
-    send(client_socketfd, "LINE_NOT_FOUND", sizeof("LINE_NOT_FOUND"), 0);
+    if(line_number > i){
+        send(client_socketfd, "LINE_NOT_FOUND", sizeof("LINE_NOT_FOUND"), 0);
+    }
+    else{
+        //recieve new line from client and save it back to the same file at line_number line
+        char buffer[1024];
+        memset(buffer, 0, sizeof(buffer));
+        recv(client_socketfd, buffer, sizeof(buffer), 0);
+        std::string new_line = std::string(buffer);
+
+        std::ofstream file_out(filename);
+        if(!file_out.is_open()){
+            //display error to stderr
+            std::cerr << "Error opening file" << std::endl;
+            return;
+        }
+        i = 1;
+        line.clear();
+        while(std::getline(file, line)){
+            if(i == line_number){
+                //write new line to file
+                file_out << new_line << std::endl;
+                break;
+            }
+            i++;
+        }
+        file_out.close();
+    }
 }
 
 void Server::viewFile(int client_socketfd,std::string filename,int start_line = 1,int end_line = -1){
@@ -218,21 +280,40 @@ void Server::viewFile(int client_socketfd,std::string filename,int start_line = 
         send(client_socketfd, "cannot read file", sizeof("cannot read file"), 0);
         return;
     }
-    //read file contents
-    std::string line;
-    int i = 1;
-    while(std::getline(file,line)){
-        if(i >= start_line){
-            //send line with line number to client
-            std::string line_with_number = std::to_string(i) + " " + line + "\n";
-            send(client_socketfd, line_with_number.c_str(), strlen(line_with_number.c_str()), 0);
-            if(end_line != -1 && i == end_line){
-                file.close();
-                return;
-            }
-        }
-        i++;
+    // //read file contents
+    // std::string line;
+    // int i = 1;
+    // while(std::getline(file,line)){
+    //     if(i >= start_line){
+    //         //send line with line number to client
+    //         std::string line_with_number = std::to_string(i) + " " + line + "\n";
+    //         send(client_socketfd, line_with_number.c_str(), strlen(line_with_number.c_str()), 0);
+    //         if(end_line != -1 && i == end_line){
+    //             file.close();
+    //             return;
+    //         }
+    //     }
+    //     i++;
+    // }
+    // //send error message to client
+    // if(start_line > i){
+    //     send(client_socketfd, "LINE_NOT_FOUND", sizeof("LINE_NOT_FOUND"), 0);
+    // }
+    // else{
+    //     file.close();
+    // }
+    
+    //send the entire file to client in one go 
+    char buffer[1024];
+    memset(buffer, 0, sizeof(buffer));
+    file.seekg(0, std::ios::end);
+    int length = file.tellg();
+    file.seekg(0, std::ios::beg);
+    int bytes_read = 0;
+    while(bytes_read < length){
+        file.read(buffer, sizeof(buffer));
+        send(client_socketfd, buffer, sizeof(buffer), 0);
+        bytes_read += sizeof(buffer);
     }
-    //send error message to client
-    send(client_socketfd, "NO_LINES_FOUND", sizeof("NO_LINES_FOUND"), 0);
+    file.close();    
 }

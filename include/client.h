@@ -20,6 +20,7 @@ class Client{
     void receiveDataFromServer();
     void createUser(std::string, std::string);
     void disconnectClient();
+    bool isConnectedToServer();
 };
 
 #endif

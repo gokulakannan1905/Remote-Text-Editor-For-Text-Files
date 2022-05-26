@@ -23,9 +23,10 @@ class Server{
     void createUser(int,User);
 
     void listDirContents(int,std::string);
-    void changeDir(std::string);
-    void editLine(int,std::string,int);
+    void changeDir(std::string,User*,int);
+    void editLine(int,std::string,std::string,int);
     void viewFile(int,std::string,int,int);
+    void selectFile(std::string&,std::string,int);
 };
 
 #endif

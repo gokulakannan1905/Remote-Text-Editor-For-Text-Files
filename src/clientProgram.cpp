@@ -8,12 +8,11 @@
 
 int main(){ 
     //create client object
-    Client client;
 
     while(true){ 
+    Client client;
     //connect to server
     client.connectToServer();
-
     //get username and password from user
     std::string username, password;
     std::cout << "Enter username: ";
@@ -43,12 +42,6 @@ int main(){
             std::cout << "Enter command: ";
             std::getline(std::cin, input);
 
-            
-            //clear the standard input buffer 
-            // std::cin.clear();
-            // std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-
             std::stringstream ss(input);
             int arguments = -1;
             std::string command,oneword;
@@ -76,7 +69,7 @@ int main(){
             }
             else if(subcommand == "bye" && arguments == 0){
                 client.disconnectClient();
-                break;
+                exit(0);
             }
             else{
                 if(subcommand == "ls" && arguments > 0){
@@ -119,6 +112,7 @@ int main(){
 
     }   
     std::cout << "Authentication failed" << std::endl;
+    client.disconnectClient();
     }
     return 0;
 }
