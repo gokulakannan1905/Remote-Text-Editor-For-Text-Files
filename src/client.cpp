@@ -49,10 +49,10 @@ void Client::receiveDataFromServer(){
     //receive data from server
     char buffer[1024];
     memset(buffer, 0, sizeof(buffer));
-    while(recv(socketfd, buffer, sizeof(buffer), 0) > 0){ //receive data from server until EOF is received from server 
+    recv(socketfd, buffer, sizeof(buffer), 0);
         std::cout << buffer << std::endl;
         memset(buffer, 0, sizeof(buffer));
-    }
+        std::cout << "data received" << std::endl;
 }
 
 bool Client::authenticateUser(std::string username, std::string password){

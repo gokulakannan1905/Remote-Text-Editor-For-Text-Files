@@ -26,13 +26,14 @@ int main(){
     std::cout << "Enter password: ";
     std::cin >> password;
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-
+    std::cout << std::endl;
     //hash the password using std::hash algorithm and convert it to string 
     std::hash<std::string> hash_fn;
     std::stringstream ss;
     ss << hash_fn(password);
     ss >> password;
-
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     //authenticate user
     if(client.authenticateUser(username,password)){
         std::cout << "Authenticated" << std::endl;
@@ -44,8 +45,8 @@ int main(){
 
             
             //clear the standard input buffer 
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            // std::cin.clear();
+            // std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
 
             std::stringstream ss(input);
