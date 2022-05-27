@@ -4,6 +4,7 @@
 
 #include<netinet/in.h>
 #include<string>
+#define MAX_SIZE 1024
 class Client{
     int socketfd;
     struct sockaddr_in server_addr;
@@ -12,8 +13,10 @@ class Client{
     std::string username;
     unsigned long password;
     bool isConnected;
+ 
     public:
     Client();
+    int getSocketfd();
     void connectToServer();
     bool authenticateUser(std::string, std::string);
     void sendDataToServer(std::string,size_t);
@@ -21,6 +24,7 @@ class Client{
     void createUser(std::string, std::string);
     void disconnectClient();
     bool isConnectedToServer();
+    void receiveFile();    
 };
 
 #endif

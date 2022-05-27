@@ -34,3 +34,5 @@ server:
 #run client
 client:
 	./bin/client
+clean:
+	rm  $(BIN)/* $(OBJ)/*

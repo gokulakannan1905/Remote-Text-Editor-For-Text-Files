@@ -24,8 +24,9 @@ int main(){
             //receive data from client
             std::string data = server.receiveDataFromClient(clientfd);
             std::stringstream ss(data);
-            std::string command,name,password,dir,filename;
+            std::string command,name,password,dir,filename = "";
             ss >> command >> name >> password;
+
             User current_user(name,password);
             if(server.authenticateUser(clientfd,current_user)){
                 while(1){
@@ -50,12 +51,19 @@ int main(){
                     else if(command == "edit"){
                         int line_number;
                         ss >> line_number;
-                        server.editLine(clientfd,dir,filename,line_number);
+                        if(filename.empty())
+                            server.sendDataToClient(clientfd,"0",1);
+                        else
+                        server.editLine(clientfd,filename,line_number);
                     }
                     else if(command == "print"){
-                        int start_line = 1,end_line = -1;
-                        ss >> start_line >> end_line;
-                        server.viewFile(clientfd,dir,start_line,end_line);
+                        if(filename.empty())
+                            server.sendDataToClient(clientfd,"0",1);
+                        else{
+                            int start_line = 1,end_line = -1;
+                            ss >> start_line >> end_line;
+                            server.viewFile(clientfd,filename,start_line,end_line);
+                        }
                     }
                     else if(command == "select"){
                         ss >> filename;

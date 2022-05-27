@@ -5,6 +5,7 @@
 #include<arpa/inet.h>
 #include<unistd.h>
 #include<string.h>
+#include<signal.h>
 #include<limits>
 #include "../include/client.h"
 
@@ -16,6 +17,7 @@ Client::Client(){
 
     //create socket
     socketfd = socket(AF_INET, SOCK_STREAM, 0);
+    // sockid = socketfd;
     if(socketfd == -1){
         //display error to stderr
         std::cerr << "Error in creating socket" << std::endl;
@@ -28,6 +30,10 @@ Client::Client(){
     server_addr.sin_port = htons(port_number);
 }
 
+int Client::getSocketfd(){
+    return this->socketfd;
+}
+
 void Client::connectToServer(){
     //connect to server
     if(connect(socketfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1){
@@ -37,6 +43,7 @@ void Client::connectToServer(){
     }   
     isConnected = true;
 }
+
 bool Client::isConnectedToServer(){
     return isConnected;
 }
@@ -49,17 +56,13 @@ void Client::sendDataToServer(std::string data, size_t size){
         exit(1);
     }
 }
+
 void Client::receiveDataFromServer(){
-    //receive the entire file from server
+    //receive untill server stops sending data
     char buffer[1024];
     memset(buffer, 0, sizeof(buffer));
-    if(recv(socketfd, buffer, sizeof(buffer), 0) == -1){
-        //display error to stderr
-        std::cerr << "Error in receiving data from server" << std::endl;
-        exit(1);
-    }
-    std::cout << buffer << std::endl;
-
+    recv(socketfd, buffer, sizeof(buffer), 0);
+        std::cout << buffer << std::endl;    
 }
 
 bool Client::authenticateUser(std::string username, std::string password){
@@ -126,3 +129,23 @@ void Client::disconnectClient(){
     sendDataToServer("bye", strlen("bye"));
     close(socketfd);
 }
+
+void Client::receiveFile(){
+    //receive file
+    int len = 0;
+    bool isNotEnd = true;
+    char buffer[MAX_SIZE];
+    while(isNotEnd){
+        //receive data from server
+        memset(buffer, 0, sizeof(buffer));
+        len = recv(socketfd, buffer, sizeof(buffer), 0);
+        if(strcmp("0",buffer)==0){
+            std::cout << "FILE_NOT_SELECTED : use select <FILENAME> command" << std::endl;
+            return;
+        }
+        isNotEnd = buffer[0];
+        write(1, buffer, len);
+    }
+    std::cout << "\nFile received successfully" << std::endl;
+}
+

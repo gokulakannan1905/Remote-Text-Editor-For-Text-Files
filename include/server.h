@@ -5,6 +5,7 @@
 #include<netinet/in.h>
 #include<string>
 #include<vector>
+#include<fcntl.h>
 #include "./user.h"
 class Server{
     int socketfd;
@@ -24,7 +25,7 @@ class Server{
 
     void listDirContents(int,std::string);
     void changeDir(std::string,User*,int);
-    void editLine(int,std::string,std::string,int);
+    void editLine(int,std::string,int);
     void viewFile(int,std::string,int,int);
     void selectFile(std::string&,std::string,int);
 };
