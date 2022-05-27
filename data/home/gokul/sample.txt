@@ -1,0 +1,1 @@
+The TCP server allots a temporary ID number. This number is linked to the device's IP address. The TCP Server opens a socket and establishes the connection. When the client disconnects, TCP server closes the socket. Now that ID number is free and may be allotted to another client.
