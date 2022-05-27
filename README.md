@@ -7,13 +7,18 @@
 > 
 >       make
 > 
-> - change directorby to bin/
+> - change directory to bin/
 > 
 >       cd bin/
 > 
-> - Start the program
+> - Start the server program
 > 
->       ./server  ./client
+>       ./server
+>       
+> - Start the client program
+> 
+>       ./client
+>       
 > #
 
 ### List of commands:
