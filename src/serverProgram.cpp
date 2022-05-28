@@ -82,6 +82,7 @@ int main(){
         }
         else{
             //close connection
+            signal(SIGCHLD,SIG_IGN);
             close(clientfd);
         }
     }

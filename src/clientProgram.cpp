@@ -8,7 +8,7 @@
 #include "../include/client.h"
 int sockid;
 void signalHandler(int signum){
-    if(signum == SIGINT || signum == SIGTERM || signum == SIGKILL){
+    if(signum == SIGINT){
         //send bye to server
         write(sockid,"bye",3);
         exit(0);
@@ -169,7 +169,7 @@ int main(){
                 memset(buffer,0,sizeof(buffer));
                 int bytes_read = read(sockid,buffer,sizeof(buffer));
                 if(strcmp("0",buffer) == 0){
-                    std::cout << "FILE_NOT_SELECTED" << std::endl;
+                    std::cout << "FILE_NOT_SELECTED: use select <FILENAME> command" << std::endl;
                     continue;
                 }
                 if(strcmp("INVALID_LINE_NUMBER",buffer) == 0){
