@@ -13,6 +13,7 @@ class User{
     std::string getDir();
     bool operator==(User);
     void storeData();
+    std::string getName();
 };
 
 #endif

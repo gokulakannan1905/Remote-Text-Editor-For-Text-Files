@@ -1,7 +1,7 @@
 #include<iostream>
 #include<string.h>
 //this comment is added via line editor
-using namespace std;
+//using namespace std;
 int main(){
     string input;
     cout << "Enter command: ";

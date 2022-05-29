@@ -73,7 +73,7 @@ int main(){
             //separate command and arguments
             std::string subcommand = command.substr(0,command.find(" "));
 
-            if(subcommand == "ls" && arguments == 0){
+            if((subcommand == "ls" || subcommand == "pwd") && arguments == 0){
                 client.sendDataToServer(command, strlen(command.c_str()));
             }
             else if(subcommand == "cd" && arguments <= 1){              

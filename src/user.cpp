@@ -6,9 +6,17 @@ User::User(std::string name, std::string password){
     this->password = password;
     this->dir = "../data/home/" + name;
 }
+std::string User::getName(){
+    return this->name;
+}
 
 void User::changeDir(std::string dir){
-    this->dir = dir;
+    if(dir.empty()){
+        this->dir = "../data/home/" + name;
+    }
+    else{
+        this->dir = dir;
+    }
 }
 
 std::string User::getDir(){

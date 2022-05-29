@@ -33,7 +33,8 @@ int main(){
                     data.clear();
                     ss.clear();
                     dir = current_user.getDir();
-                    
+                    //send the dir to client
+                    // server.sendDataToClient(clientfd,dir,dir.length());
                     //receive data from client
                     data = server.receiveDataFromClient(clientfd);
                     ss.str(data);
@@ -42,10 +43,12 @@ int main(){
                     if(command == "ls"){
                         server.listDirContents(clientfd,dir);
                     }
+                    else if(command == "pwd"){
+                        server.sendDataToClient(clientfd,dir,dir.length());
+                    }
                     else if(command == "cd"){
                         std::string new_dir;
                         ss >> new_dir;
-                        if(!new_dir.empty())
                             server.changeDir(new_dir,&current_user,clientfd);
                     }
                     else if(command == "edit"){

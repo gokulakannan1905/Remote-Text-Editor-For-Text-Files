@@ -189,21 +189,43 @@ void Server::changeDir(std::string new_directory,User* current_user,int client_s
     
     DIR *dir;
     struct dirent *ent;
-    if ((dir = opendir ((current_user->getDir()).c_str())) != NULL) {
-        while ((ent = readdir (dir)) != NULL)
-        if(ent->d_type == DT_DIR && ent->d_name == new_directory) 
-        {
-            //change directory
-            current_user->changeDir(current_user->getDir() + "/" + new_directory);
-            //send success message to client
-            send(client_socketfd, "DIRECTORY_CHANGED", sizeof("DIRECTORY_CHANGED"), 0);
-            return;
+    if(new_directory.empty()){
+        //change directory to home directory
+        current_user->changeDir("");
+        //send switched to home directory message to client
+        send(client_socketfd, "SWITCHED_TO_HOME_DIRECTORY", sizeof("SWITCHED_TO_HOME_DIRECTORY"), 0);
+    }
+    else if ((dir = opendir ((current_user->getDir()).c_str())) != NULL){
+        while ((ent = readdir (dir)) != NULL){
+            if(ent->d_type == DT_DIR && ent->d_name == new_directory && new_directory != ".." && new_directory != "."){
+                    //change directory
+                    current_user->changeDir(current_user->getDir()+ "/" + new_directory);
+                    //send success message to client
+                    send(client_socketfd, "DIRECTORY_CHANGED", sizeof("DIRECTORY_CHANGED"), 0);
+                    closedir (dir);
+                    return;
+            }
+            else if(new_directory == ".." || new_directory == "../"){
+                //change directory and restrict user to go beyond the ../data/home/username directory
+                if(current_user->getDir() == "../data/home/" + current_user->getName()){
+                    //send restricted message to client
+                    send(client_socketfd, "DIRECTORY_RESTRICTED", sizeof("DIRECTORY_RESTRICTED"), 0);
+                    closedir (dir);
+                    return;
+                }
+                //go to previous directory and remove the last directory from the current directory
+                current_user->changeDir(current_user->getDir().substr(0,current_user->getDir().find_last_of("/")));
+                //send success message to client
+                send(client_socketfd, "DIRECTORY_CHANGED", sizeof("DIRECTORY_CHANGED"), 0);
+                closedir (dir);
+                return;
+            }
         }
         closedir (dir);
     }
     //send failure message to client
-    send(client_socketfd, "DIRECTORY_NOT_FOUND", sizeof("DIRECTORY_NOT_FOUND"), 0);
-    
+    else
+    send(client_socketfd, "DIRECTORY_NOT_FOUND", sizeof("DIRECTORY_NOT_FOUND"), 0);    
 }
 
 void Server::selectFile(std::string &filename,std::string dirname,int client_socketfd){

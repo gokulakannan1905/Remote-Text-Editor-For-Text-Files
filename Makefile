@@ -17,8 +17,12 @@ OBJ = ./obj
 
 all: build
 
-build: $(OBJ)/server.o $(OBJ)/client.o $(OBJ)/user.o
+build: build-server build-client
+
+build-server: $(OBJ)/server.o $(OBJ)/user.o $(SRC)/serverProgram.cpp
 	$(CC) $(OUTPUT) $(BIN)/server $(OBJ)/server.o $(OBJ)/user.o $(SRC)/serverProgram.cpp
+
+build-client: $(OBJ)/client.o $(SRC)/clientProgram.cpp
 	$(CC) $(OUTPUT) $(BIN)/client $(OBJ)/client.o $(SRC)/clientProgram.cpp
 
 $(OBJ)/server.o: $(SRC)/server.cpp
@@ -35,4 +39,4 @@ server:
 client:
 	./bin/client
 clean:
-	rm  $(BIN)/* $(OBJ)/*
+	rm  $(BIN)/server $(BIN)/client $(OBJ)/server.o $(OBJ)/client.o $(OBJ)/user.o
