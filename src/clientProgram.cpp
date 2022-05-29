@@ -25,11 +25,13 @@ int main(){
 
     //connect to server
     client.connectToServer();
+    //receive connection confirmation from server
+    client.receiveDataFromServer();
 
     //get username and password from user
     std::string username, password;
     std::cout << "Enter username: ";
-    std::cin >> username;
+    std::getline(std::cin, username);
 
     termios oldt;
     tcgetattr(STDIN_FILENO, &oldt);
@@ -37,20 +39,22 @@ int main(){
     newt.c_lflag &= ~ECHO;
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
     std::cout << "Enter password: ";
-    std::cin >> password;
+    std::getline(std::cin, password);
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 
     std::cout << std::endl;
+    if(!(username.empty() && password.empty())){
     //hash the password using std::hash algorithm and convert it to string 
     std::hash<std::string> hash_fn;
     std::stringstream ss;
     ss << hash_fn(password);
     ss >> password;
-
-    std::cin.clear();
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-
+    }
+    else{
+        username = "anonymous";
+        password = "password";
+    }
+   
     //authenticate user
     if(client.authenticateUser(username,password)){
         std::cout << "Authenticated" << std::endl;

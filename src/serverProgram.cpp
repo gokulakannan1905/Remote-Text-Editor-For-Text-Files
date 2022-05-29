@@ -13,6 +13,8 @@ int main(){
     Server server;
     while(1){
         int clientfd = server.acceptConnections();
+        //send confirmation message to client
+        server.sendDataToClient(clientfd, "Connected to server",20); 
 
         //create child process
         pid_t pid = fork();
@@ -26,6 +28,8 @@ int main(){
             std::stringstream ss(data);
             std::string command,name,password,dir,filename = "";
             ss >> command >> name >> password;
+            //display the username and password
+            std::cout << data << std::endl;
 
             User current_user(name,password);
             if(server.authenticateUser(clientfd,current_user)){
@@ -33,8 +37,6 @@ int main(){
                     data.clear();
                     ss.clear();
                     dir = current_user.getDir();
-                    //send the dir to client
-                    // server.sendDataToClient(clientfd,dir,dir.length());
                     //receive data from client
                     data = server.receiveDataFromClient(clientfd);
                     ss.str(data);

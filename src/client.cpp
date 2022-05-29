@@ -11,7 +11,7 @@
 
 Client::Client(){
     this->socketfd = 0;
-    this->port_number = 8012;
+    this->port_number = 8888;
     this->ip_address = "127.0.0.1";
     this->isConnected = false;
 
@@ -62,7 +62,7 @@ void Client::receiveDataFromServer(){
     char buffer[1024];
     memset(buffer, 0, sizeof(buffer));
     recv(socketfd, buffer, sizeof(buffer), 0);
-        std::cout << buffer << std::endl;    
+    std::cout << buffer << std::endl;    
 }
 
 bool Client::authenticateUser(std::string username, std::string password){

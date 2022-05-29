@@ -16,7 +16,7 @@
 
 Server::Server(){
     this->socketfd = 0;
-    this->port_number = 8012;
+    this->port_number = 8888;
     this->ip_address = "0.0.0.0";
     this->users.clear();
 
@@ -76,7 +76,7 @@ Server::Server(){
         std::cerr << "Error in listening for connections" << std::endl;
         exit(1);
     }
-    std::cout << "Server is listening on port 8012" << std::endl;
+    std::cout << "Server is listening on port "<< port_number << std::endl;
 }
 
 int Server::acceptConnections(){
