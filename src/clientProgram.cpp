@@ -91,23 +91,26 @@ int main(){
                         std::cout << "Invalid argument" << std::endl;
                         continue;
                     }
+                    //send command to server
+                    client.sendDataToServer(command, strlen(command.c_str()));
                 }
                 else{
                     // check both 2nd and 3rd arguments are numbers
-                    std::stringstream ss(command.substr(command.find(" ")+1));
-                    int number;
-                    ss >> number;
-                    if(ss.fail()){
+                    int number1,number2;
+                    std::stringstream ss1(command.substr(command.find(" ")+1));
+                    ss1 >> number1;
+                    if(ss1.fail()){
                         std::cout << "Invalid argument" << std::endl;
                         continue;
                     }
-                    ss.clear();
-                    ss.str(command.substr(command.find(" ")+1+command.find(" ")));
-                    ss >> number;
-                    if(ss.fail()){
+                    std::stringstream ss2(command.substr(command.find(" ")+1+1));
+                    ss2 >> number2;
+                    if(ss2.fail()){
                         std::cout << "Invalid argument" << std::endl;
                         continue;
                     }
+                    //send command to server
+                    client.sendDataToServer(command, strlen(command.c_str()));
                 }
             }
             else if(subcommand == "edit" && arguments == 1){

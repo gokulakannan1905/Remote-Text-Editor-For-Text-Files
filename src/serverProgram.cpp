@@ -65,6 +65,8 @@ int main(){
                         else{
                             int start_line = 1,end_line = -1;
                             ss >> start_line >> end_line;
+                            //print start_line and end_line
+                            std::cout << "start_line: " << start_line << " end_line: " << end_line << std::endl;
                             server.viewFile(clientfd,filename,start_line,end_line);
                         }
                     }

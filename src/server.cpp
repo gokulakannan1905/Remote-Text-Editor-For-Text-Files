@@ -179,7 +179,7 @@ void Server::listDirContents(int client_socketfd,std::string directory){
         //remove the last newline character
         buffer.pop_back();
         send(client_socketfd, buffer.c_str(), buffer.size(), 0);
-        closedir (dir);
+        closedir(dir);
     }
     else
         send(client_socketfd, "NO_FILES_FOUND", sizeof("NO_FILES_FOUND"), 0);
@@ -202,7 +202,7 @@ void Server::changeDir(std::string new_directory,User* current_user,int client_s
                     current_user->changeDir(current_user->getDir()+ "/" + new_directory);
                     //send success message to client
                     send(client_socketfd, "DIRECTORY_CHANGED", sizeof("DIRECTORY_CHANGED"), 0);
-                    closedir (dir);
+                    closedir(dir);
                     return;
             }
             else if(new_directory == ".." || new_directory == "../"){
@@ -210,18 +210,18 @@ void Server::changeDir(std::string new_directory,User* current_user,int client_s
                 if(current_user->getDir() == "../data/home/" + current_user->getName()){
                     //send restricted message to client
                     send(client_socketfd, "DIRECTORY_RESTRICTED", sizeof("DIRECTORY_RESTRICTED"), 0);
-                    closedir (dir);
+                    closedir(dir);
                     return;
                 }
                 //go to previous directory and remove the last directory from the current directory
                 current_user->changeDir(current_user->getDir().substr(0,current_user->getDir().find_last_of("/")));
                 //send success message to client
                 send(client_socketfd, "DIRECTORY_CHANGED", sizeof("DIRECTORY_CHANGED"), 0);
-                closedir (dir);
+                closedir(dir);
                 return;
             }
         }
-        closedir (dir);
+        closedir(dir);
     }
     //send failure message to client
     else
@@ -240,11 +240,11 @@ void Server::selectFile(std::string &filename,std::string dirname,int client_soc
                 //send success message to client
                 send(client_socketfd, "FILE_SELECTED", sizeof("FILE_SELECTED"), 0);
                 std::cout << "File selected: " << filename << std::endl;
-                closedir (dir);
+                closedir(dir);
                 return;
             }
         }
-        closedir (dir);
+        closedir(dir);
     }
     //clear filename
     filename.clear();
@@ -296,15 +296,15 @@ void Server::editLine(int client_socketfd,std::string filename,int line_number){
     file_write.close();    
 }
 
-void Server::viewFile(int client_socketfd,std::string filename,int start_line = 1,int end_line = -1){
+void Server::viewFile(int client_socketfd,std::string filename,int start_line,int end_line){
     //open file in read mode
     std::ifstream file(filename);
     if(!file.is_open()){
-        //display error to stderr
-        send(client_socketfd, "cannot read file", sizeof("cannot read file"), 0);
+        //send failure message to client
+        sendDataToClient(client_socketfd, "FILE_NOT_FOUND", sizeof("FILE_NOT_FOUND"));
         return;
     }
-    // // //read file contents
+    //read file contents
     std::string line;
     int i = 1;
     while(std::getline(file,line)){
@@ -314,11 +314,12 @@ void Server::viewFile(int client_socketfd,std::string filename,int start_line = 
             send(client_socketfd, line_with_number.c_str(), strlen(line_with_number.c_str()), 0);
             if(end_line != -1 && i == end_line){
                 file.close();
-                return;
+                break;
             }
         }
         i++;
     }
+    file.close();
     // // send error message to client
     // if(start_line > i){
     //     std::string err = "INVALID_LINE_NUMBER";
