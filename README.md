@@ -29,3 +29,4 @@
     5. print <START_LINE_NO> <END_LINE_NO>
     6. edit <LINE_NUM>
     7. bye
+    8. clear or c
