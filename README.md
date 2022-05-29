@@ -23,7 +23,9 @@
 
 ### List of commands:
     1. ls
-    2. select <FILENAME>
-    3. print
-    4. edit <LINENUM>
-    5. bye
+    2. pwd
+    3. cd <DIR_NAME>
+    4. select <FILE_NAME>
+    5. print <START_LINE_NO> <END_LINE_NO>
+    6. edit <LINE_NUM>
+    7. bye
