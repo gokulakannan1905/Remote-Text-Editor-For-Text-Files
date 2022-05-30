@@ -17,7 +17,7 @@
 
 Server::Server(){
     this->socketfd = 0;
-    this->port_number = 8888;
+    this->port_number = 8778;
     this->ip_address = "0.0.0.0";
     this->users.clear();
 
@@ -129,32 +129,32 @@ bool Server::authenticateUser(int client_socketfd,User current_user){
     for(auto user : users){
         if(user == current_user){
             //send success message to client
-            send(client_socketfd, "AUTHENTICATED", sizeof("AUTHENTICATED"), 0);
+            send(client_socketfd, "AUTHENTICATED", strlen("AUTHENTICATED"), 0);
             return true;
         }
     }
     //send failure message to client
-    send(client_socketfd, "NOT_AUTHENTICATED", sizeof("NOT_AUTHENTICATED"), 0);
+    send(client_socketfd, "NOT_AUTHENTICATED", strlen("NOT_AUTHENTICATED"), 0);
     return false;
 }
 
-void Server::createUser(int client_socketfd,User current_user){
+void Server::createUser(int client_socketfd,User new_user){
     //check whether user is present in users vector
     for(auto user : users){
-        if(user == current_user){
+        if(user == new_user){
             //send failure message to client
-            send(client_socketfd, "USER_ALREADY_EXISTS", sizeof("USER_ALREADY_EXISTS"), 0);
+            send(client_socketfd, "USER_ALREADY_EXISTS", strlen("USER_ALREADY_EXISTS"), 0);
             return;
         }
     }
     //add user to users vector
-    users.push_back(current_user);
+    users.push_back(new_user);
     //store the data in ../data/users.txt file
-    current_user.storeData();
+    new_user.storeData();
     //create user's directory
-    mkdir(current_user.getDir().c_str(), 0777);
+    mkdir(new_user.getDir().c_str(), 0777);
     //send success message to client
-    send(client_socketfd, "USER_CREATED", sizeof("USER_CREATED"), 0);
+    send(client_socketfd, "USER_CREATED", strlen("USER_CREATED"), 0);
 }
 
 void Server::listDirContents(int client_socketfd,std::string directory){
@@ -195,6 +195,7 @@ void Server::changeDir(std::string new_directory,User* current_user,int client_s
         current_user->changeDir("");
         //send switched to home directory message to client
         send(client_socketfd, "SWITCHED_TO_HOME_DIRECTORY", sizeof("SWITCHED_TO_HOME_DIRECTORY"), 0);
+        return;
     }
     else if ((dir = opendir ((current_user->getDir()).c_str())) != NULL){
         while ((ent = readdir (dir)) != NULL){
@@ -225,7 +226,6 @@ void Server::changeDir(std::string new_directory,User* current_user,int client_s
         closedir(dir);
     }
     //send failure message to client
-    else
     send(client_socketfd, "DIRECTORY_NOT_FOUND", sizeof("DIRECTORY_NOT_FOUND"), 0);    
 }
 
@@ -285,6 +285,7 @@ void Server::editLine(int client_socketfd,std::string filename,int line_number){
     char buffer[1024];
     memset(buffer, 0, sizeof(buffer));
     recv(client_socketfd, buffer, sizeof(buffer), 0);
+    std::cout << "Edited line: " << buffer << std::endl;
     //replace the line in the vector
     lines[line_number-1] = buffer;
     //open file in write mode

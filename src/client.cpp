@@ -11,7 +11,7 @@
 
 Client::Client(){
     this->socketfd = 0;
-    this->port_number = 8888;
+    this->port_number = 8778;
     this->ip_address = "127.0.0.1";
     this->isConnected = false;
 
@@ -101,9 +101,8 @@ void Client::createUser(std::string username, std::string password){
         std::cerr << "Not connected to the server" << std::endl;
         exit(1);
     }
-    //create user
-    std::string data = "CREATE_USER " + username + " " + password;
-
+    //get user details from user
+    std::string data = "create " + username + " " + password;
     //send data to server
     sendDataToServer(data, strlen(data.c_str()));
 

@@ -81,6 +81,14 @@ int main(){
             if((subcommand == "ls" || subcommand == "pwd") && arguments == 0){
                 client.sendDataToServer(command, strlen(command.c_str()));
             }
+            // else if(subcommand == "create" && arguments == 2){
+            //     //get username and password from user
+            //     std::string username, password;
+            //     std::stringstream ss(command);
+            //     ss >> subcommand >> username >> password;
+            //     //send create command to server
+            //     client.createUser(username,password);
+            // }
             else if(subcommand == "cd" && arguments <= 1){              
                 client.sendDataToServer(command, strlen(command.c_str()));
             }
@@ -188,7 +196,11 @@ int main(){
                 //ask user to edit the line received from server and send it to server
                 std::string edited_line;
                 std::cout << "\nEnter changes to the line: ";
+                //allow user to type empty line also
                 std::getline(std::cin, edited_line);
+                std::cout << edited_line << std::endl;
+                if(edited_line.length() == 0)
+                edited_line = " ";
                 client.sendDataToServer(edited_line, strlen(edited_line.c_str()));
             }
             else if(subcommand == "print"){

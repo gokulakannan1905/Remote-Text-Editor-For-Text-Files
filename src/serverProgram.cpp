@@ -46,6 +46,12 @@ int main(){
                     if(command == "ls"){
                         server.listDirContents(clientfd,dir);
                     }
+                    else if(command =="create"){
+                        std::string username,passwd;
+                        ss >> username >> passwd;
+                        std::cout << username << " " << passwd << std::endl;
+                        server.createUser(clientfd,User(username,passwd));
+                    }
                     else if(command == "pwd"){
                         server.sendDataToClient(clientfd,dir,dir.length());
                     }
