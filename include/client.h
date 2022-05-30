@@ -3,7 +3,6 @@
 #define CLIENT_H
 
 #include<netinet/in.h>
-#include<string>
 #define MAX_SIZE 1024
 class Client{
     int socketfd;

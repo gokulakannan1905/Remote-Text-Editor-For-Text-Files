@@ -1,4 +1,5 @@
 #include<iostream>
+#include<fcntl.h>
 #include<string.h>
 #include<sstream>
 #include<vector>

@@ -3,9 +3,7 @@
 #define SERVER_H
 
 #include<netinet/in.h>
-#include<string>
 #include<vector>
-#include<fcntl.h>
 #include "./user.h"
 class Server{
     int socketfd;
