@@ -17,7 +17,7 @@
 
 Server::Server(){
     this->socketfd = 0;
-    this->port_number = 8778;
+    this->port_number = 8788;
     this->ip_address = "0.0.0.0";
     this->users.clear();
 

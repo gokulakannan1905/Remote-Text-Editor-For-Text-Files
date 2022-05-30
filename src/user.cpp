@@ -36,6 +36,6 @@ void User::storeData(){
         return;
     }
     //store the user name : password : dir in the file
-    file << this->name << ":" << this->password << ":" << this->dir << std::endl;
+    file << this->name << " " << this->password << " " << this->dir << std::endl;
     file.close();
 }

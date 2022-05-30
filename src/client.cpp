@@ -6,12 +6,13 @@
 #include<unistd.h>
 #include<string.h>
 #include<signal.h>
+#include<sstream>
 #include<limits>
 #include "../include/client.h"
 
 Client::Client(){
     this->socketfd = 0;
-    this->port_number = 8778;
+    this->port_number = 8788;
     this->ip_address = "127.0.0.1";
     this->isConnected = false;
 
@@ -101,6 +102,11 @@ void Client::createUser(std::string username, std::string password){
         std::cerr << "Not connected to the server" << std::endl;
         exit(1);
     }
+     //hash the password using std::hash algorithm and convert it to string
+    std::hash<std::string> hash_fn;
+    std::stringstream ss;
+    ss << hash_fn(password);
+    ss >> password;
     //get user details from user
     std::string data = "create " + username + " " + password;
     //send data to server
@@ -116,10 +122,10 @@ void Client::createUser(std::string username, std::string password){
     }
     //check whether the user is created
     if(std::string(buffer) == "USER_CREATED"){
-        std::cout << "User created successfully" << std::endl;
+        std::cout << "USER_CREATED_SUCCESSFULLY" << std::endl;
     }
     else{
-        std::cout << "User creation failed" << std::endl;
+        std::cout << "FAILED_TO_CREATE_USER" << std::endl;
     }
 }
 

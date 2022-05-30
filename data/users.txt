@@ -1,3 +1,5 @@
 anonymous password ../data/home/anonymous
 gokul 4276043300406975678 ../data/home/gokul
 kannan 7335195395326976524 ../data/home/kannan
+user1 18173506343833423888 ../data/home/user1
+user2 6938241232870214567 ../data/home/user2

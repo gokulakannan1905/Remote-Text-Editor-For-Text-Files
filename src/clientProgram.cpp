@@ -81,14 +81,14 @@ int main(){
             if((subcommand == "ls" || subcommand == "pwd") && arguments == 0){
                 client.sendDataToServer(command, strlen(command.c_str()));
             }
-            // else if(subcommand == "create" && arguments == 2){
-            //     //get username and password from user
-            //     std::string username, password;
-            //     std::stringstream ss(command);
-            //     ss >> subcommand >> username >> password;
-            //     //send create command to server
-            //     client.createUser(username,password);
-            // }
+            else if(subcommand == "create" && arguments == 2){
+                //get username and password from user
+                std::string username, password;
+                std::stringstream ss(command);
+                ss >> subcommand >> username >> password;               
+                client.createUser(username,password);
+								continue;
+            }
             else if(subcommand == "cd" && arguments <= 1){              
                 client.sendDataToServer(command, strlen(command.c_str()));
             }
