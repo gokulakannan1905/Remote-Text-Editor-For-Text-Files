@@ -7,7 +7,7 @@
 #include<sys/types.h>
 #include<unistd.h>
 #include<sstream>
-#include "../include/server.h"
+#include<server.h>
 
 int main(){
     //create server object

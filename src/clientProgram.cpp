@@ -6,7 +6,7 @@
 #include <termios.h>
 #include <unistd.h>
 #include<signal.h>
-#include "../include/client.h"
+#include <client.h>
 int sockid;
 void signalHandler(int signum){
     if(signum == SIGINT){

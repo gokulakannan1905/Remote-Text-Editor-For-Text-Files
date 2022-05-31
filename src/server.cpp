@@ -12,8 +12,8 @@
 #include<limits>
 #include<dirent.h>
 #include<sys/stat.h>
-#include "../include/server.h"
-#include "../include/user.h"
+#include <server.h>
+#include <user.h>
 
 Server::Server(){
     this->socketfd = 0;
@@ -270,7 +270,7 @@ void Server::editLine(int client_socketfd,std::string filename,int line_number){
     //close file
     file.close();
     //check whether line_number is valid
-    if(line_number > lines.size()){
+    if(line_number > (int)lines.size()){
         //send failure message to client
         sendDataToClient(client_socketfd, "INVALID_LINE_NUMBER", sizeof("INVALID_LINE_NUMBER"));
         return;

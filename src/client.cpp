@@ -8,7 +8,7 @@
 #include<signal.h>
 #include<sstream>
 #include<limits>
-#include "../include/client.h"
+#include<client.h>
 
 Client::Client(){
     this->socketfd = 0;
