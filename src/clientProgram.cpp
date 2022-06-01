@@ -210,7 +210,7 @@ int main()
 
                 /* receive data from server */
                 if (subcommand == "edit")
-                    client.editLine();
+                    client.EditLine();
                 else if (subcommand == "print")
                     client.ReceiveFile();
                 else
