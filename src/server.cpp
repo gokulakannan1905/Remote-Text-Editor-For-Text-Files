@@ -159,7 +159,7 @@ std::string Server::ReceiveDataFromClient(int client_socketfd)
 /*
  * This function is responsible for sending data to the client.
  */
-void Server::SendDataToClient(int client_socketfd, std::string data, size_t size)
+void Server::SendDataToClient(int client_socketfd,const std::string &data, size_t size)
 {
     /* send data to client */
     if (send(client_socketfd, data.c_str(), size, 0) == -1)
@@ -240,15 +240,15 @@ void Server::CreateUser(int client_socketfd, User new_user)
 /*
  * This function is responsible for handling the ls request.
  */
-void Server::ListDirContents(int client_socketfd, std::string directory)
+void Server::ListDirContents(int client_socketfd, const std::string &directory)
 {
     /* list directory contents */
     DIR *dir;
-    struct dirent *ent;
     std::string buffer, filename;
     buffer.clear();
     if ((dir = opendir(directory.c_str())) != NULL)
     {
+    struct dirent *ent;
         while ((ent = readdir(dir)) != NULL)
         {
             if (ent->d_type == DT_DIR)
@@ -277,11 +277,10 @@ void Server::ListDirContents(int client_socketfd, std::string directory)
 /*
  * This function is responsible for handling the cd request.
  */
-void Server::ChangeDir(std::string new_directory, User &current_user, int client_socketfd)
+void Server::ChangeDir(const std::string &new_directory, User &current_user, int client_socketfd)
 {
 
     DIR *dir;
-    struct dirent *ent;
     if (new_directory.empty())
     {
         /* change directory to home directory */
@@ -292,6 +291,7 @@ void Server::ChangeDir(std::string new_directory, User &current_user, int client
     }
     else if ((dir = opendir((current_user.GetDir()).c_str())) != NULL)
     {
+    struct dirent *ent;
         while ((ent = readdir(dir)) != NULL)
         {
             if (ent->d_type == DT_DIR && ent->d_name == new_directory && new_directory != ".." && new_directory != ".")
@@ -330,13 +330,13 @@ void Server::ChangeDir(std::string new_directory, User &current_user, int client
 /*
  * This function is responsible for handling the select request.
  */
-void Server::SelectFile(std::string &filename, std::string dirname, int client_socketfd)
+void Server::SelectFile(std::string &filename,const std::string &dirname, int client_socketfd)
 {
     /* check whether file exists in current directory */
     DIR *dir;
-    struct dirent *ent;
     if ((dir = opendir(dirname.c_str())) != NULL)
     {
+    struct dirent *ent;
         while ((ent = readdir(dir)) != NULL)
         {
             if (ent->d_type == DT_REG && std::string(ent->d_name) == filename)
@@ -361,7 +361,7 @@ void Server::SelectFile(std::string &filename, std::string dirname, int client_s
 /*
  * This function is responsible for handling the edit request.
  */
-void Server::EditLine(int client_socketfd, std::string filename, int line_number)
+void Server::EditLine(int client_socketfd,const std::string &filename, int line_number)
 {
     /* open file in read mode at line_number line */
     std::ifstream file(filename);
@@ -391,7 +391,7 @@ void Server::EditLine(int client_socketfd, std::string filename, int line_number
     /* send the selected line with line_number to client */
     line.clear();
     line = std::to_string(line_number) + ":" + lines[line_number - 1];
-    SendDataToClient(client_socketfd, line.c_str(), line.size());
+    SendDataToClient(client_socketfd, line, line.length());
 
     /* receive the edited line from client */
     char buffer[1024];
@@ -403,9 +403,9 @@ void Server::EditLine(int client_socketfd, std::string filename, int line_number
     /* open file in write mode */
     std::ofstream file_write(filename);
     /* write the vector to file */
-    for (auto line : lines)
+    for (auto single_line : lines)
     {
-        file_write << line << std::endl;
+        file_write << single_line << std::endl;
     }
     /* close file */
     file_write.close();
@@ -414,7 +414,7 @@ void Server::EditLine(int client_socketfd, std::string filename, int line_number
 /*
  * This function is responsible for handling the print request.
  */
-void Server::ViewFile(int client_socketfd, std::string filename, int start_line, int end_line)
+void Server::ViewFile(int client_socketfd, const std::string &filename, int start_line, int end_line)
 {
     /* open file in read mode */
     std::ifstream file(filename);

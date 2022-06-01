@@ -7,7 +7,7 @@
 /*
  * Constructor for the user class.
  */
-User::User(std::string name, std::string password)
+User::User(const std::string &name, const std::string &password)
 {
     this->name = name;
     this->password = password;
@@ -26,7 +26,7 @@ std::string User::GetName()
 /*
  * changes the directory of the user.
  */
-void User::ChangeDir(std::string dir)
+void User::ChangeDir(const std::string &dir)
 {
     if (dir.empty())
     {

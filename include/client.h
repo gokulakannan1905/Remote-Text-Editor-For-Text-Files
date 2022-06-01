@@ -22,12 +22,11 @@ public:
     Client();
     int GetSocketfd();
     void ConnectToServer();
-    bool AuthenticateUser(std::string username, std::string password);
-    void SendDataToServer(std::string data, size_t size);
+    bool AuthenticateUser(const std::string &username, const std::string &password);
+    void SendDataToServer(const std::string &data, size_t size);
     void ReceiveDataFromServer();
-    void CreateUser(std::string username, std::string password);
+    void CreateUser(const std::string &username,std::string &password);
     void DisconnectClient();
-    bool IsConnectedToServer();
     void ReceiveFile();
     ~Client();
 };

@@ -26,14 +26,14 @@ public:
     Server();
     int AcceptConnections();
     std::string ReceiveDataFromClient(int);
-    void SendDataToClient(int clientfd, std::string data, size_t size);
+    void SendDataToClient(int clientfd, const std::string &data, size_t size);
     bool AuthenticateUser(int clientfd, const User &user);
     void CreateUser(int clientfd, User user);
-    void ListDirContents(int clientfd, std::string dir);
-    void ChangeDir(std::string dir, User &user, int clientfd);
-    void EditLine(int clientfd, std::string file, int linenum);
-    void ViewFile(int clientfd, std::string file, int start_line_no, int end_line_no);
-    void SelectFile(std::string &filename, std::string dir, int clientfd);
+    void ListDirContents(int clientfd, const std::string &dir);
+    void ChangeDir(const std::string &dir, User &user, int clientfd);
+    void EditLine(int clientfd, const std::string &file, int linenum);
+    void ViewFile(int clientfd, const std::string &file, int start_line_no, int end_line_no);
+    void SelectFile(std::string &filename, const std::string &dir, int clientfd);
     ~Server();
 };
 

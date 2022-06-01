@@ -81,18 +81,9 @@ void Client::ConnectToServer()
 
 
 /*
- * This is a getter function for reading the connection status
- */
-bool Client::IsConnectedToServer()
-{
-    return isConnected;
-}
-
-
-/*
  * This function send data to the server
  */
-void Client::SendDataToServer(std::string data, size_t size)
+void Client::SendDataToServer(const std::string &data, size_t size)
 {
     /* send data to server */
     if (send(socketfd, data.c_str(), size, 0) == -1)
@@ -125,7 +116,7 @@ void Client::ReceiveDataFromServer()
 /*
  * This function is used to authenticate the user
  */
-bool Client::AuthenticateUser(std::string username, std::string password)
+bool Client::AuthenticateUser(const std::string &username,const std::string &password)
 {
     /* check whether the client is connected to server */
     if (!isConnected)
@@ -162,7 +153,7 @@ bool Client::AuthenticateUser(std::string username, std::string password)
 /*
  * This function is used to create a new user
  */
-void Client::CreateUser(std::string username, std::string password)
+void Client::CreateUser(const std::string &username,std::string &password)
 {
     /* check whether the client is connected to server */
     if (!isConnected)
@@ -216,11 +207,11 @@ void Client::DisconnectClient()
  */ 
 void Client::ReceiveFile()
 {
-    int len = 0;
     bool isNotEnd = true;
     char buffer[MAX_SIZE];
     while (isNotEnd)
     {
+        int len = 0;
         /* receive data from server */
         memset(buffer, 0, sizeof(buffer));
         len = recv(socketfd, buffer, sizeof(buffer), 0);

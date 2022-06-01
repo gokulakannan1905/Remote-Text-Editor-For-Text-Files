@@ -102,10 +102,10 @@ int main()
                 else if (subcommand == "create" && arguments == 2)
                 {
                     /* get username and password from user */
-                    std::string username, password;
-                    std::stringstream ss(command);
-                    ss >> subcommand >> username >> password;
-                    client.CreateUser(username, password);
+                    std::string user_name, passwd;
+                    std::stringstream str_s(command);
+                    str_s >> subcommand >> user_name >> passwd;
+                    client.CreateUser(user_name, passwd);
                     continue;
                 }
                 else if (subcommand == "cd" && arguments <= 1)
@@ -119,9 +119,9 @@ int main()
                     else if (arguments == 1)
                     {
                         /* check 2nd argument is a number */
-                        std::stringstream ss(command.substr(command.find(" ") + 1));
+                        std::stringstream str_stream(command.substr(command.find(" ") + 1));
                         int number;
-                        ss >> number;
+                        str_stream >> number;
                         if (ss.fail())
                         {
                             std::cout << "Invalid argument" << std::endl;
@@ -155,9 +155,9 @@ int main()
                 else if (subcommand == "edit" && arguments == 1)
                 {
                     /* check whether the argument is a number */
-                    std::stringstream ss(command.substr(command.find(" ") + 1));
+                    std::stringstream ss3(command.substr(command.find(" ") + 1));
                     int number;
-                    ss >> number;
+                    ss3 >> number;
                     if (ss.fail())
                     {
                         std::cout << "Invalid argument" << std::endl;

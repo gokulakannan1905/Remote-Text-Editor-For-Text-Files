@@ -14,8 +14,8 @@ private:
     std::string dir;
 
 public:
-    User(std::string name, std::string password);
-    void ChangeDir(std::string new_dir);
+    User(const std::string &name,const std::string &password);
+    void ChangeDir(const std::string &new_dir);
     std::string GetDir();
     bool operator==(const User &user);
     void StoreData();
