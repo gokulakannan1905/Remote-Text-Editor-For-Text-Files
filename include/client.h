@@ -27,6 +27,7 @@ public:
     void ReceiveDataFromServer();
     void CreateUser(const std::string &username,std::string &password);
     void DisconnectClient();
+    void EditLine();
     void ReceiveFile();
     ~Client();
 };

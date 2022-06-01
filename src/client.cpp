@@ -190,6 +190,33 @@ void Client::CreateUser(const std::string &username,std::string &password)
         std::cerr << "FAILED_TO_CREATE_USER" << std::endl;
 }
 
+void Client::EditLine(){
+    char buffer[1024];
+    memset(buffer, 0, sizeof(buffer));
+    int bytes_read = read(socketfd, buffer, sizeof(buffer));
+    if (strcmp("0", buffer) == 0)
+    {
+        std::cerr << "FILE_NOT_SELECTED: use select <FILENAME> command" << std::endl;
+        return;
+    }
+    if (strcmp("INVALID_LINE_NUMBER", buffer) == 0)
+    {
+        std::cerr << "INVALID_LINE_NUMBER" << std::endl;
+        return;
+    }
+    write(1, buffer, bytes_read);
+
+    /* ask user to edit the line received from server and send it to server */
+    std::string edited_line;
+    std::cout << "\nEnter changes to the line: ";
+    /* allow user to type empty line also */
+    std::getline(std::cin, edited_line);
+    if (edited_line.length() == 0)
+        SendDataToServer("0", 1);
+    else
+     SendDataToServer(edited_line, edited_line.length());
+}
+
 
 /* 
  * This function disconnects the client from the server

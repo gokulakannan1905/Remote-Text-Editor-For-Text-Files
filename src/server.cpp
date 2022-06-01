@@ -432,8 +432,27 @@ void Server::ViewFile(int client_socketfd, const std::string &filename, int star
         return;
     }
 
-    /* read file contents and send it to the client */
+    //get the number of lines in the file
     std::string line;
+    int line_number = 0;
+    std::ifstream file_read(filename);
+    while (std::getline(file_read, line))
+    {
+        line_number++;
+    }
+    file_read.close();
+    
+    /* check whether start_line and end_line is valid */
+    if(end_line > line_number || start_line > line_number )
+    {
+        //send the failure msg with start and end line of the file to client
+        std::string msg = std::string("INVALID_LINE_NUMBER Choose between ") + std::to_string(1) + " AND " + std::to_string(line_number);
+        SendDataToClient(client_socketfd, msg, msg.length());
+
+    }else{
+
+    /* read file contents and send it to the client */
+    line.clear();
     int i = 1;
     while (std::getline(file, line))
     {
@@ -451,6 +470,7 @@ void Server::ViewFile(int client_socketfd, const std::string &filename, int star
         i++;
     }
     file.close();
+    }
     char buff[1024];
     memset(buff, 0, sizeof(buff));
     write(client_socketfd, buff, 1024);

@@ -36,4 +36,4 @@ int main(){
         std::cout << buffer << std::endl;
     }
     return 0;
-}
+} //this is where program ends
