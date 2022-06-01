@@ -35,6 +35,8 @@ Server::Server()
     this->port_number = 8788;
     this->ip_address = "0.0.0.0";
     this->users.clear();
+    this->client_addr = {};
+    this->client_addr_size = sizeof(this->client_addr);
 
     /* read data from ../data/users.txt file and store it in users vector */
     std::ifstream file;
