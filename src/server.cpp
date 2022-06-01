@@ -446,7 +446,7 @@ void Server::ViewFile(int client_socketfd, const std::string &filename, int star
     if(end_line > line_number || start_line > line_number )
     {
         //send the failure msg with start and end line of the file to client
-        std::string msg = std::string("INVALID_LINE_NUMBER Choose between ") + std::to_string(1) + " AND " + std::to_string(line_number);
+        std::string msg = std::string("INVALID_LINE_NUMBER Choose between ") + std::to_string(1) + " and " + std::to_string(line_number);
         SendDataToClient(client_socketfd, msg, msg.length());
 
     }else{

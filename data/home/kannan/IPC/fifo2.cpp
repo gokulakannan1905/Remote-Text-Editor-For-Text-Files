@@ -18,5 +18,5 @@ int main(){
     write(fd,"hello",5);
     close(fd);
     return 0;
-    
+//hello this is ********************
 }

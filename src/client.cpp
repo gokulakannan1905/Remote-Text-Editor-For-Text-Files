@@ -250,5 +250,5 @@ void Client::ReceiveFile()
         isNotEnd = buffer[0];
         write(1, buffer, len);
     }
-    std::cout << "\nFile received successfully" << std::endl;
+    std::cout << std::endl;
 }

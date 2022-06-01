@@ -35,7 +35,7 @@ int main(){
 		write(fifoFD,buf,length);
 		if(strcmp(buf,"exit\n")==0){
 			close(fifoFD);
-			//unlink(fifoName); //unlink is not required as the fifo is deleted when the process exits
+unlink(fifoName);
 			exit(0);
 		}
 		close(fifoFD);
