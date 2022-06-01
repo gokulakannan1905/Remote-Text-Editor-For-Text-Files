@@ -399,6 +399,7 @@ void Server::EditLine(int client_socketfd,const std::string &filename, int line_
     recv(client_socketfd, buffer, sizeof(buffer), 0);
     std::cout << "Edited line: " << buffer << std::endl;
     /* replace the line in the vector */
+    if(strcmp(buffer,"0")!=0)
     lines[line_number - 1] = buffer;
     /* open file in write mode */
     std::ofstream file_write(filename);

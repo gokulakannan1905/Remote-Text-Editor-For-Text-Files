@@ -122,7 +122,7 @@ int main()
                         std::stringstream str_stream(command.substr(command.find(" ") + 1));
                         int number;
                         str_stream >> number;
-                        if (ss.fail())
+                        if (str_stream.fail())
                         {
                             std::cout << "Invalid argument" << std::endl;
                             continue;
@@ -250,9 +250,11 @@ int main()
                     std::cout << "\nEnter changes to the line: ";
                     /* allow user to type empty line also */
                     std::getline(std::cin, edited_line);
-                    if (edited_line.length() == 0)
-                        edited_line = buffer;
-                    client.SendDataToServer(edited_line, strlen(edited_line.c_str()));
+                    if (edited_line.length() == 0){
+                        client.SendDataToServer("0", 1);
+                    }
+                    else
+                    client.SendDataToServer(edited_line, edited_line.length());
                 }
                 else if (subcommand == "print")
                 {
