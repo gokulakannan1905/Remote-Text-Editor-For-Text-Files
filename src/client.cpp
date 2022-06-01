@@ -1,151 +1,232 @@
-#include<iostream>
-#include<vector>
-#include<sys/socket.h>
-#include<netinet/in.h>
-#include<arpa/inet.h>
-#include<unistd.h>
-#include<string.h>
-#include<signal.h>
-#include<sstream>
-#include<limits>
-#include<client.h>
+/*
+ * This file has the implementation of the client class member functions.
+ */
 
-Client::Client(){
+
+#include <iostream>
+#include <vector>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <string.h>
+#include <signal.h>
+#include <sstream>
+#include <limits>
+#include <client.h>
+
+/*
+* TCP client class constructor for creating socket and initializing variables
+*/
+Client::Client()
+{
+    // Initializing the client variables
     this->socketfd = 0;
     this->port_number = 8788;
     this->ip_address = "127.0.0.1";
     this->isConnected = false;
+    this->server_addr = {};
 
-    //create socket
+    /* create socket */
     socketfd = socket(AF_INET, SOCK_STREAM, 0);
-    // sockid = socketfd;
-    if(socketfd == -1){
-        //display error to stderr
-        std::cerr << "Error in creating socket" << std::endl;
-        exit(1);
-    }   
-    //initialize server address
+    if (socketfd == -1)
+    {
+        /* display error to stderr */
+        perror("socket");
+        exit(EXIT_FAILURE);
+    }
+
+    /* initialize server address */
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = inet_addr(ip_address.c_str());
     server_addr.sin_port = htons(port_number);
 }
 
-int Client::getSocketfd(){
+
+/*
+ * destructor for closing the socket and freeing the memory allocated
+ */
+Client::~Client()
+{
+    /* close socket */
+    close(socketfd);
+}
+
+
+/*
+ * This is a getter function for getting the socket descriptor
+ */
+int Client::GetSocketfd()
+{
     return this->socketfd;
 }
 
-void Client::connectToServer(){
-    //connect to server
-    if(connect(socketfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1){
-        //display error to stderr
-        std::cerr << "Error in connecting to server" << std::endl;
-        return;
-    }   
+
+/*
+ * This function is used to connect to the server
+ */
+void Client::ConnectToServer()
+{
+    /* connect to server */
+    if (connect(socketfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1)
+    {
+        /* display error to stderr */
+        perror("connect");
+        exit(EXIT_FAILURE);
+    }
     isConnected = true;
 }
 
-bool Client::isConnectedToServer(){
+
+/*
+ * This is a getter function for reading the connection status
+ */
+bool Client::IsConnectedToServer()
+{
     return isConnected;
 }
 
-void Client::sendDataToServer(std::string data, size_t size){
-    //send data to server
-    if(send(socketfd, data.c_str(), size, 0) == -1){
-        //display error to stderr
-        std::cerr << "Error in sending data to server" << std::endl;
-        exit(1);
+
+/*
+ * This function send data to the server
+ */
+void Client::SendDataToServer(std::string data, size_t size)
+{
+    /* send data to server */
+    if (send(socketfd, data.c_str(), size, 0) == -1)
+    {
+        /* display error to stderr */
+        perror("send");
+        exit(EXIT_FAILURE);
     }
 }
 
-void Client::receiveDataFromServer(){
-    //receive untill server stops sending data
+
+/*
+ * This function is used to receive data from the server and display it
+ */
+void Client::ReceiveDataFromServer()
+{
     char buffer[1024];
     memset(buffer, 0, sizeof(buffer));
-    recv(socketfd, buffer, sizeof(buffer), 0);
-    std::cout << buffer << std::endl;    
+    if (recv(socketfd, buffer, sizeof(buffer), 0) == -1)
+    {
+        /* display error to stderr */
+        perror("recv");
+        exit(EXIT_FAILURE);
+    }
+    /* display data to stdout */
+    std::cout << buffer << std::endl;
 }
 
-bool Client::authenticateUser(std::string username, std::string password){
-    //check whether the client is connected to server
-    if(!isConnected){
-        //display error to stderr
+
+/*
+ * This function is used to authenticate the user
+ */
+bool Client::AuthenticateUser(std::string username, std::string password)
+{
+    /* check whether the client is connected to server */
+    if (!isConnected)
+    {
+        /* display error to stderr */
         std::cerr << "Not connected to the server" << std::endl;
-        exit(1);
+        exit(EXIT_FAILURE);
     }
-    //authenticate user
+    /* authenticate user */
     std::string data = "AUTHENTICATE " + username + " " + password;
 
-    //send data to server
-    sendDataToServer(data, strlen(data.c_str()));
+    /* send data to server */
+    SendDataToServer(data, data.length());
 
-    //receive data from server
+    /* receive data from server */
     char buffer[18];
     memset(buffer, 0, sizeof(buffer));
-    if(recv(socketfd, buffer, sizeof(buffer), 0) == -1){
-        //display error to stderr
-        std::cerr << "Error in receiving data from server" << std::endl;
-        exit(1);
+    if (recv(socketfd, buffer, sizeof(buffer), 0) == -1)
+    {
+        /* display error to stderr */
+        perror("recv");
+        exit(EXIT_FAILURE);
     }
-    //check whether the user is authenticated
-    if(std::string(buffer) == "AUTHENTICATED"){
+    /* check whether the user is authenticated */
+    if (std::string(buffer) == "AUTHENTICATED")
+    {
         return true;
     }
     isConnected = false;
     return false;
 }
 
-void Client::createUser(std::string username, std::string password){
-    //check whether the client is connected to server
-    if(!isConnected){
-        //display error to stderr
+
+/*
+ * This function is used to create a new user
+ */
+void Client::CreateUser(std::string username, std::string password)
+{
+    /* check whether the client is connected to server */
+    if (!isConnected)
+    {
+        /* display error to stderr */
         std::cerr << "Not connected to the server" << std::endl;
-        exit(1);
+        exit(EXIT_FAILURE);
     }
-     //hash the password using std::hash algorithm and convert it to string
+    /* hash the password using std::hash algorithm and convert it to string */
     std::hash<std::string> hash_fn;
     std::stringstream ss;
     ss << hash_fn(password);
     ss >> password;
-    //get user details from user
-    std::string data = "create " + username + " " + password;
-    //send data to server
-    sendDataToServer(data, strlen(data.c_str()));
 
-    //receive data from server
+    /* concatenate the data to be sent to server */
+    std::string data = "create " + username + " " + password;
+
+    /* send data to server */
+    SendDataToServer(data, data.length());
+
+    /* receive data from server */
     char buffer[20];
     memset(buffer, 0, sizeof(buffer));
-    if(recv(socketfd, buffer, sizeof(buffer), 0) == -1){
-        //display error to stderr
-        std::cerr << "Error in receiving data from server" << std::endl;
-        exit(1);
+    if (recv(socketfd, buffer, sizeof(buffer), 0) == -1)
+    {
+        /* display error to stderr */
+        perror("recv");
+        exit(EXIT_FAILURE);
     }
-    //check whether the user is created
-    if(std::string(buffer) == "USER_CREATED"){
+    /* check whether the user is created */
+    if (std::string(buffer) == "USER_CREATED")
         std::cout << "USER_CREATED_SUCCESSFULLY" << std::endl;
-    }
-    else{
-        std::cout << "FAILED_TO_CREATE_USER" << std::endl;
-    }
+    else
+        std::cerr << "FAILED_TO_CREATE_USER" << std::endl;
 }
 
-void Client::disconnectClient(){
-    //close socket
-    sendDataToServer("bye", strlen("bye"));
+
+/* 
+ * This function disconnects the client from the server
+ */
+void Client::DisconnectClient()
+{
+    /* send "bye" to server and close the socket */
+    SendDataToServer("bye", strlen("bye"));
     close(socketfd);
 }
 
-void Client::receiveFile(){
-    //receive file
+
+/*
+ * This function display the contents of the file in the server
+ */ 
+void Client::ReceiveFile()
+{
     int len = 0;
     bool isNotEnd = true;
     char buffer[MAX_SIZE];
-    while(isNotEnd){
-        //receive data from server
+    while (isNotEnd)
+    {
+        /* receive data from server */
         memset(buffer, 0, sizeof(buffer));
         len = recv(socketfd, buffer, sizeof(buffer), 0);
-        if(strcmp("0",buffer)==0){
-            std::cout << "FILE_NOT_SELECTED : use select <FILENAME> command" << std::endl;
+        if (strcmp("0", buffer) == 0)
+        {
+            std::cerr << "FILE_NOT_SELECTED : use select <FILENAME> command" << std::endl;
             return;
         }
         isNotEnd = buffer[0];
@@ -153,4 +234,3 @@ void Client::receiveFile(){
     }
     std::cout << "\nFile received successfully" << std::endl;
 }
-

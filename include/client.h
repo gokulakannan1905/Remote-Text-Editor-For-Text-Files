@@ -1,29 +1,35 @@
-//avoid multiple inclusions
+/*
+* This class is used to store the TCP/IP connection information.
+* It is used for TCP client program.
+*/
+
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include<netinet/in.h>
+#include <netinet/in.h>
 #define MAX_SIZE 1024
-class Client{
+
+class Client
+{
+private:
     int socketfd;
     struct sockaddr_in server_addr;
     int port_number;
     std::string ip_address;
-    std::string username;
-    unsigned long password;
     bool isConnected;
- 
-    public:
+
+public:
     Client();
-    int getSocketfd();
-    void connectToServer();
-    bool authenticateUser(std::string, std::string);
-    void sendDataToServer(std::string,size_t);
-    void receiveDataFromServer();
-    void createUser(std::string, std::string);
-    void disconnectClient();
-    bool isConnectedToServer();
-    void receiveFile();    
+    int GetSocketfd();
+    void ConnectToServer();
+    bool AuthenticateUser(std::string username, std::string password);
+    void SendDataToServer(std::string data, size_t size);
+    void ReceiveDataFromServer();
+    void CreateUser(std::string username, std::string password);
+    void DisconnectClient();
+    bool IsConnectedToServer();
+    void ReceiveFile();
+    ~Client();
 };
 
 #endif

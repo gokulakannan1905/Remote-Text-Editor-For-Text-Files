@@ -4,4 +4,4 @@ This line is edited through line editor v0.1
 This project is based on socket programming.
 C++ has lot of features, it works well with Linux kernel and linux/GNU OS.
 This machine is Debian linux 11 (bullseye).
-VIM is a popular editor used throughout the project.
+7:VIM is a improved vi editor which is used throughout the project.
