@@ -257,13 +257,17 @@ void Server::ListDirContents(int client_socketfd, const std::string &directory)
             {
                 filename.clear();
                 /* send the directory contents to client */
-                filename = "d******\t" + std::string(ent->d_name) + "\n";
-                buffer += filename;
+                // dont add .. and . to the list
+                if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0)
+                {
+                    filename = "d\t" + std::string(ent->d_name) + "/\n";
+                    buffer += filename;                    
+                }                
             }
             else if (ent->d_type == DT_REG)
             {
                 filename.clear();
-                filename = "-******\t" + std::string(ent->d_name) + "\n";
+                filename = "-\t" + std::string(ent->d_name) + "\n";
                 buffer += filename;
             }
         }
