@@ -158,7 +158,7 @@ int main()
                     std::stringstream ss3(command.substr(command.find(" ") + 1));
                     int number;
                     ss3 >> number;
-                    if (ss.fail())
+                    if (ss3.fail())
                     {
                         std::cout << "Invalid argument" << std::endl;
                         continue;
