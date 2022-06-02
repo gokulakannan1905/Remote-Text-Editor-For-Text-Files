@@ -131,23 +131,23 @@ int main()
                         ss1 >> number1;
                         if (ss1.fail())
                         {
-                            std::cout << "Value 1 must be a number" << std::endl;
+                            std::cerr << "Value 1 must be a number" << std::endl;
                             continue;
                         }
                         if(number1 <= 0)
                         {
-                            std::cout << number1 << "Value 1 should be greater than 0" << std::endl;
+                            std::cerr << "Value 1 should be greater than 0" << std::endl;
                             continue;
                         }
                         ss1 >> number2;
                         if (ss1.fail())
                         {
-                            std::cout << "Value must be a number" << std::endl;
+                            std::cerr << "Value 2 must be a number" << std::endl;
                             continue;
                         }
                         if(number2 <= 0)
                         {
-                            std::cout << number2 << " Value 2 should be greater than 0" << std::endl;
+                            std::cerr << "Value 2 should be greater than 0" << std::endl;
                             continue;
                         }
                         /* send command to server */
@@ -162,7 +162,12 @@ int main()
                     ss3 >> number;
                     if (ss3.fail())
                     {
-                        std::cout << "Value must be a number" << std::endl;
+                        std::cerr << "Value must be a number" << std::endl;
+                        continue;
+                    }
+                    if(number <= 0)
+                    {
+                        std::cerr << "Value should be greater than 0" << std::endl;
                         continue;
                     }
                     client.SendDataToServer(command, strlen(command.c_str()));
