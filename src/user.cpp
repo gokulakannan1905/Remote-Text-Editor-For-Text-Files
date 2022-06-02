@@ -1,6 +1,6 @@
 /* This is the user class's implementation of member functions. */
 
-#include "../include/user.h"
+#include <user.h>
 #include <fstream>
 #include <iostream>
 
