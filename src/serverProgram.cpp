@@ -39,7 +39,6 @@ int main()
             std::string command, name, password, dir, filename;
 
             ss >> command >> name >> password;
-            std::cout << data << std::endl;
 
             User current_user(name, password);
 
@@ -65,7 +64,6 @@ int main()
                     data = server.ReceiveDataFromClient(clientfd);
                     ss.str(data);
                     ss >> command;
-                    std::cout << "data received: #" << command << "#" << std::endl;
 
                     /*
                      * Command List

@@ -113,7 +113,6 @@ Server::Server()
         perror("listen");
         exit(EXIT_FAILURE);
     }
-    std::cout << "Server is listening on port " << port_number << std::endl;
 }
 
 /*
@@ -353,7 +352,6 @@ void Server::SelectFile(std::string &filename,const std::string &dirname, int cl
                 filename = dirname + "/" + filename;
                 /* send success message to client */
                 send(client_socketfd, "FILE_SELECTED", sizeof("FILE_SELECTED"), 0);
-                std::cout << "File selected: " << filename << std::endl;
                 closedir(dir);
                 return;
             }
@@ -405,7 +403,6 @@ void Server::EditLine(int client_socketfd,const std::string &filename, int line_
     char buffer[1024];
     memset(buffer, 0, sizeof(buffer));
     recv(client_socketfd, buffer, sizeof(buffer), 0);
-    std::cout << "Edited line: " << buffer << std::endl;
     /* replace the line in the vector */
     if(strcmp(buffer,"0")!=0)
     lines[line_number - 1] = buffer;
