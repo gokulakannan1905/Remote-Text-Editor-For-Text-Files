@@ -11,7 +11,7 @@
 #include <signal.h>
 #include <client.h>
 
-/* Global variable */
+/* This Global variable is used for signal handler function */
 int sockid;
 
 /* Function to handle ctrl+c */
@@ -222,7 +222,7 @@ int main()
                     client.ReceiveDataFromServer();
             }
         }
-        std::cerr << "AUTHENTICATION_FAILED" << std::endl;
+        std::cerr << "AUTHENTICATION_FAILED try again...\n" << std::endl;
         client.DisconnectClient();
     }
     return 0;

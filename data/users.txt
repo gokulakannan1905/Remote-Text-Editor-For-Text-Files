@@ -1,3 +1,7 @@
 anonymous password ../data/home/anonymous
 gokul 4276043300406975678 ../data/home/gokul
 kannan 7335195395326976524 ../data/home/kannan
+nayla 1937681097253405685 ../data/home/nayla
+hari 10671643519615244393 ../data/home/hari
+anith 7361960728106400824 ../data/home/anith
+ravi 18176501007326352838 ../data/home/ravi
