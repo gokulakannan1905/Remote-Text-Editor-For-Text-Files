@@ -56,7 +56,8 @@ bool User::operator==(const User &user)
 
 /*
  * to store the data of the user in a file.
- */
+ * This is not a requirement but it is added for testing purpose.
+
 void User::StoreData()
 {
     std::ofstream file;
@@ -71,3 +72,4 @@ void User::StoreData()
     file << this->name << " " << this->password << " " << this->dir << std::endl;
     file.close();
 }
+*/

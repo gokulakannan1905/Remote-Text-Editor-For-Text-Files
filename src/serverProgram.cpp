@@ -81,13 +81,6 @@ int main()
                     {
                         server.ListDirContents(clientfd, dir);
                     }
-                    else if (command == "create")
-                    {
-                        std::string username, passwd;
-                        ss >> username >> passwd;
-                        std::cout << username << " " << passwd << std::endl;
-                        server.CreateUser(clientfd, User(username, passwd));
-                    }
                     else if (command == "pwd")
                     {
                         server.SendDataToClient(clientfd, dir, dir.length());

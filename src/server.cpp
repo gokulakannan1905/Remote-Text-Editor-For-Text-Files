@@ -32,7 +32,7 @@
 Server::Server()
 {
     this->socketfd = 0;
-    this->port_number = 8788;
+    this->port_number = 8012;
     this->ip_address = "0.0.0.0";
     this->users.clear();
     this->client_addr = {};
@@ -213,31 +213,33 @@ bool Server::AuthenticateUser(int client_socketfd, const User &current_user)
 
 /*
  * This function is responsible for creating a new user.
- */
+ * This is not in requirements but it is added for testing purpose.
 void Server::CreateUser(int client_socketfd, User new_user)
 {
-    /* check whether user is present in users vector */
+    // check whether user is present in users vector
     for (auto user : users)
     {
         if (user == new_user)
         {
-            /* send failure message to client */
+            // send failure message to client
             send(client_socketfd, "USER_ALREADY_EXISTS", strlen("USER_ALREADY_EXISTS"), 0);
             return;
         }
     }
-    /* add user to users vector */
+    // add user to users vector
     users.push_back(new_user);
 
-    /* store the data in ../data/users.txt file */
+    // store the data in ../data/users.txt file
     new_user.StoreData();
 
-    /* create user's directory */
+    // create user's directory 
     mkdir(new_user.GetDir().c_str(), 0777);
 
-    /* send success message to client */
+    // send success message to client
     send(client_socketfd, "USER_CREATED", strlen("USER_CREATED"), 0);
 }
+*/
+
 
 /*
  * This function is responsible for handling the ls request.

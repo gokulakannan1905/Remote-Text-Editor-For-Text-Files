@@ -23,7 +23,7 @@ Client::Client()
 {
     // Initializing the client variables
     this->socketfd = 0;
-    this->port_number = 8788;
+    this->port_number = 8012;
     this->ip_address = "127.0.0.1";
     this->isConnected = false;
     this->server_addr = {};
@@ -152,43 +152,45 @@ bool Client::AuthenticateUser(const std::string &username,const std::string &pas
 
 /*
  * This function is used to create a new user
- */
+ * This is not in current requirement but added for testing purpose
+
 void Client::CreateUser(const std::string &username,std::string &password)
 {
-    /* check whether the client is connected to server */
+    // check whether the client is connected to server
     if (!isConnected)
     {
-        /* display error to stderr */
+        // display error to stderr 
         std::cerr << "Not connected to the server" << std::endl;
         exit(EXIT_FAILURE);
     }
-    /* hash the password using std::hash algorithm and convert it to string */
+    // hash the password using std::hash algorithm and convert it to string 
     std::hash<std::string> hash_fn;
     std::stringstream ss;
     ss << hash_fn(password);
     ss >> password;
 
-    /* concatenate the data to be sent to server */
+    // concatenate the data to be sent to server
     std::string data = "create " + username + " " + password;
 
-    /* send data to server */
+    // send data to server
     SendDataToServer(data, data.length());
 
-    /* receive data from server */
+    // receive data from server 
     char buffer[20];
     memset(buffer, 0, sizeof(buffer));
     if (recv(socketfd, buffer, sizeof(buffer), 0) == -1)
     {
-        /* display error to stderr */
+        // display error to stderr 
         perror("recv");
         exit(EXIT_FAILURE);
     }
-    /* check whether the user is created */
+    // check whether the user is created
     if (std::string(buffer) == "USER_CREATED")
         std::cout << "USER_CREATED_SUCCESSFULLY" << std::endl;
     else
         std::cerr << "FAILED_TO_CREATE_USER" << std::endl;
 }
+*/
 
 void Client::EditLine(){
     char buffer[1024];
