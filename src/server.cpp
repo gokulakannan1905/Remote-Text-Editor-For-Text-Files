@@ -24,6 +24,8 @@
 #include <server.h>
 #include <user.h>
 #define DATA_DIR "../data/"
+#define USERS "users.txt"
+#define PORT 8012
 
 /*
  * This is the constructor for the server class.
@@ -32,57 +34,11 @@
 Server::Server()
 {
     this->socketfd = 0;
-    this->port_number = 8012;
-    this->ip_address = "0.0.0.0";
     this->users.clear();
     this->client_addr = {};
     this->client_addr_size = sizeof(this->client_addr);
-
-    /* read data from ../data/users.txt file and store it in users vector */
-    std::ifstream file;
-    try
-    {
-        std::string users_file = "users.txt";
-        file.open(DATA_DIR + users_file);
-        if (!file.is_open())
-            /* throw the error if file is not opened */
-            throw "File : users.txt not found";
-    }
-    catch (const char *msg)
-    {
-        std::cerr << msg << std::endl;
-        exit(EXIT_FAILURE);
-    }
-    std::string line;
-    while (std::getline(file, line))
-    {
-        std::stringstream ss(line);
-        std::string name, password, dir;
-        ss >> name >> password >> dir;
-        User user(name, password);
-        users.push_back(user);
-    }
-    file.close();
-
-    /* read data from ../data/ip_blacklist.txt file and store it in ip_blacklist vector */
-    try
-    {
-        std::string ip_blacklist_file = "ip_blacklist.txt";
-        file.open(DATA_DIR + ip_blacklist_file);
-        /* throw the error if file is not opened */
-        if (!file.is_open())
-            throw "File : ip_blacklist.txt not found";
-    }
-    catch (const char *msg)
-    {
-        std::cerr << msg << std::endl;
-        exit(EXIT_FAILURE);
-    }
-    while (std::getline(file, line))
-    {
-        ip_blacklist.push_back(line);
-    }
-    file.close();
+    memset(this->buffer, 0, MAX_SIZE);
+    memset(&server_addr, 0, sizeof(server_addr));    
 
     /* create socket */
     socketfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -93,10 +49,7 @@ Server::Server()
         exit(EXIT_FAILURE);
     }
     /* initialize server address */
-    memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr(ip_address.c_str());
-    server_addr.sin_port = htons(port_number);
+    server_addr = {AF_INET, htons(PORT), INADDR_ANY};
 
     /* bind socket to server address */
     if (bind(socketfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1)
@@ -113,17 +66,34 @@ Server::Server()
         perror("listen");
         exit(EXIT_FAILURE);
     }
-    std::cout << "Server is listening on port " << port_number << std::endl;
+    std::cout << "Server is listening on port " << PORT << std::endl;
 }
 
-/*
- * destructor for closing the socket and freeing the memory allocated
- */
-Server::~Server()
-{
-    /* close socket */
-    close(socketfd);
+int Server::LoadUsersData(){
+    /* read data from ../data/users.txt file and store it in users vector */
+    std::ifstream file;
+    std::string line;   
+    std::string users_file = USERS;
+    std::string name, password, dir;
+    std::stringstream ss;
+
+    file.open(DATA_DIR + users_file);
+    if (!file.is_open())
+        return -1;
+    while (std::getline(file, line))
+    {
+        ss.str(line);
+        ss >> name >> password >> dir;
+        if(!name.empty() && !password.empty()){
+            User user(name, password);
+            users.push_back(user);
+        }
+        ss.clear();
+    }
+    file.close();
+    return 0;
 }
+
 
 /*
  * This function is responsibe for accepting the client connection.
@@ -136,7 +106,7 @@ int Server::AcceptConnections()
     {
         /* display error to stderr */
         perror("accept");
-        exit(EXIT_FAILURE);
+        return -1;
     }
     return client_socketfd;
 }
@@ -144,32 +114,32 @@ int Server::AcceptConnections()
 /*
  * This receive function is responsible for receiving the data from the client.
  */
-std::string Server::ReceiveDataFromClient(int client_socketfd)
+char* Server::ReceiveDataFromClient(int client_socketfd)
 {
     /* receive data from client */
-    char buffer[1024];
     memset(buffer, 0, sizeof(buffer));
-    if (recv(client_socketfd, buffer, sizeof(buffer), 0) == -1)
+    if (recv(client_socketfd, buffer, MAX_SIZE, 0) == -1)
     {
         /* display error to stderr */
         perror("recv");
-        exit(EXIT_FAILURE);
+        return NULL;
     }
-    return std::string(buffer);
+    return buffer;
 }
 
 /*
  * This function is responsible for sending data to the client.
  */
-void Server::SendDataToClient(int client_socketfd,const std::string &data, size_t size)
+int Server::SendDataToClient(int client_socketfd,const std::string &data)
 {
     /* send data to client */
-    if (send(client_socketfd, data.c_str(), size, 0) == -1)
+    if (send(client_socketfd, data.c_str(), data.length(), 0) == -1)
     {
         /* display error to stderr */
         perror("send");
-        exit(EXIT_FAILURE);
+        return -1;
     }
+    return 0;
 }
 
 /*
@@ -179,23 +149,6 @@ void Server::SendDataToClient(int client_socketfd,const std::string &data, size_
  */
 bool Server::AuthenticateUser(int client_socketfd, const User &current_user)
 {
-
-    /* get client's ip address */
-    std::string client_ip = inet_ntoa(client_addr.sin_addr);
-
-    /* check if client's ip address is in ip_blacklist */
-    for (auto ip : ip_blacklist)
-    {
-        if (client_ip == ip)
-        {
-            /* send error message to client */
-            send(client_socketfd, "error", strlen("error"), 0);
-
-            /* close connection with client */
-            close(client_socketfd);
-            return false;
-        }
-    }
     /* check whether user is present in users vector */
     for (auto user : users)
     {
@@ -212,47 +165,16 @@ bool Server::AuthenticateUser(int client_socketfd, const User &current_user)
 }
 
 /*
- * This function is responsible for creating a new user.
- * This is not in requirements but it is added for testing purpose.
-void Server::CreateUser(int client_socketfd, User new_user)
-{
-    // check whether user is present in users vector
-    for (auto user : users)
-    {
-        if (user == new_user)
-        {
-            // send failure message to client
-            send(client_socketfd, "USER_ALREADY_EXISTS", strlen("USER_ALREADY_EXISTS"), 0);
-            return;
-        }
-    }
-    // add user to users vector
-    users.push_back(new_user);
-
-    // store the data in ../data/users.txt file
-    new_user.StoreData();
-
-    // create user's directory 
-    mkdir(new_user.GetDir().c_str(), 0777);
-
-    // send success message to client
-    send(client_socketfd, "USER_CREATED", strlen("USER_CREATED"), 0);
-}
-*/
-
-
-/*
  * This function is responsible for handling the ls request.
  */
-void Server::ListDirContents(int client_socketfd, const std::string &directory)
+int Server::ListDirContents(int client_socketfd, const std::string &directory)
 {
     /* list directory contents */
     DIR *dir;
     std::string buffer, filename;
-    buffer.clear();
     if ((dir = opendir(directory.c_str())) != NULL)
     {
-    struct dirent *ent;
+        struct dirent *ent;
         while ((ent = readdir(dir)) != NULL)
         {
             if (ent->d_type == DT_DIR)
@@ -275,17 +197,18 @@ void Server::ListDirContents(int client_socketfd, const std::string &directory)
         }
         /* remove the last newline character */
         buffer.pop_back();
-        send(client_socketfd, buffer.c_str(), buffer.size(), 0);
+        SendDataToClient(client_socketfd, buffer.c_str());
         closedir(dir);
-    }
-    else
-        send(client_socketfd, "NO_FILES_FOUND", sizeof("NO_FILES_FOUND"), 0);
+        return 0;
+    }    
+    send(client_socketfd, "NO_FILES_FOUND", sizeof("NO_FILES_FOUND"), 0);
+    return -1;
 }
 
 /*
  * This function is responsible for handling the cd request.
  */
-void Server::ChangeDir(const std::string &new_directory, User &current_user, int client_socketfd)
+int Server::ChangeDir(const std::string &new_directory, User &current_user, int client_socketfd)
 {
 
     DIR *dir;
@@ -295,7 +218,7 @@ void Server::ChangeDir(const std::string &new_directory, User &current_user, int
         current_user.ChangeDir("");
         /* send switched to home directory message to client */
         send(client_socketfd, "SWITCHED_TO_HOME_DIRECTORY", sizeof("SWITCHED_TO_HOME_DIRECTORY"), 0);
-        return;
+        return 0;
     }
     else if ((dir = opendir((current_user.GetDir()).c_str())) != NULL)
     {
@@ -309,7 +232,7 @@ void Server::ChangeDir(const std::string &new_directory, User &current_user, int
                 /* send success message to client */
                 send(client_socketfd, "DIRECTORY_CHANGED", sizeof("DIRECTORY_CHANGED"), 0);
                 closedir(dir);
-                return;
+                return 0;
             }
             else if (new_directory == ".." || new_directory == "../")
             {
@@ -319,26 +242,27 @@ void Server::ChangeDir(const std::string &new_directory, User &current_user, int
                     /* send restricted message to client */
                     send(client_socketfd, "DIRECTORY_RESTRICTED", sizeof("DIRECTORY_RESTRICTED"), 0);
                     closedir(dir);
-                    return;
+                    return 0;
                 }
                 /* go to previous directory and remove the last directory from the current directory */
                 current_user.ChangeDir(current_user.GetDir().substr(0, current_user.GetDir().find_last_of("/")));
                 /* send success message to client */
                 send(client_socketfd, "DIRECTORY_CHANGED", sizeof("DIRECTORY_CHANGED"), 0);
                 closedir(dir);
-                return;
+                return 0;
             }
         }
         closedir(dir);
     }
     /* send failure message to client */
     send(client_socketfd, "DIRECTORY_NOT_FOUND", sizeof("DIRECTORY_NOT_FOUND"), 0);
+    return -1;
 }
 
 /*
  * This function is responsible for handling the select request.
  */
-void Server::SelectFile(std::string &filename,const std::string &dirname, int client_socketfd)
+int Server::SelectFile(std::string &filename,const std::string &dirname, int client_socketfd)
 {
     /* check whether file exists in current directory */
     DIR *dir;
@@ -355,7 +279,7 @@ void Server::SelectFile(std::string &filename,const std::string &dirname, int cl
                 send(client_socketfd, "FILE_SELECTED", sizeof("FILE_SELECTED"), 0);
                 std::cout << "File selected: " << filename << std::endl;
                 closedir(dir);
-                return;
+                return 0;
             }
         }
         closedir(dir);
@@ -364,20 +288,21 @@ void Server::SelectFile(std::string &filename,const std::string &dirname, int cl
     filename.clear();
     /* send failure message to client */
     send(client_socketfd, "FILE_NOT_FOUND", sizeof("FILE_NOT_FOUND"), 0);
+    return -1;
 }
 
 /*
  * This function is responsible for handling the edit request.
  */
-void Server::EditLine(int client_socketfd,const std::string &filename, int line_number)
+int Server::EditLine(int client_socketfd,const std::string &filename, int line_number)
 {
     /* open file in read mode at line_number line */
     std::ifstream file(filename);
     if (!file.is_open())
     {
         /* display error to stderr */
-        SendDataToClient(client_socketfd, "FILE_NOT_FOUND", sizeof("FILE_NOT_FOUND"));
-        return;
+        SendDataToClient(client_socketfd, "FILE_NOT_FOUND");
+        return -1;
     }
     /* store the file in a vector */
     std::vector<std::string> lines;
@@ -392,23 +317,40 @@ void Server::EditLine(int client_socketfd,const std::string &filename, int line_
     if (line_number > (int)lines.size())
     {
         /* send failure message to client */
-        SendDataToClient(client_socketfd, "INVALID_LINE_NUMBER", sizeof("INVALID_LINE_NUMBER"));
-        return;
+        SendDataToClient(client_socketfd, "INVALID_LINE_NUMBER");
+        return -1;
     }
 
     /* send the selected line with line_number to client */
     line.clear();
     line = std::to_string(line_number) + ":" + lines[line_number - 1];
-    SendDataToClient(client_socketfd, line, line.length());
+    SendDataToClient(client_socketfd, line);
 
     /* receive the edited line from client */
-    char buffer[1024];
     memset(buffer, 0, sizeof(buffer));
     recv(client_socketfd, buffer, sizeof(buffer), 0);
     std::cout << "Edited line: " << buffer << std::endl;
+
+    //again load the file in a vector
+    std::ifstream file1(filename);
+    if (!file1.is_open())
+    {
+        /* display error to stderr */
+        SendDataToClient(client_socketfd, "FILE_NOT_FOUND");
+        return -1;
+    }
+    std::string line1;
+    lines.clear();
+    while (std::getline(file1, line1))
+    {
+        lines.push_back(line1);
+    }   
+    /* close file */
+    file1.close();
     /* replace the line in the vector */
     if(strcmp(buffer,"0")!=0)
     lines[line_number - 1] = buffer;
+
     /* open file in write mode */
     std::ofstream file_write(filename);
     /* write the vector to file */
@@ -418,20 +360,21 @@ void Server::EditLine(int client_socketfd,const std::string &filename, int line_
     }
     /* close file */
     file_write.close();
+    return 0;
 }
 
 /*
  * This function is responsible for handling the print request.
  */
-void Server::ViewFile(int client_socketfd, const std::string &filename, int start_line, int end_line)
+int Server::ViewFile(int client_socketfd, const std::string &filename, int start_line, int end_line)
 {
     /* open file in read mode */
     std::ifstream file(filename);
     if (!file.is_open())
     {
         /* end failure message to client */
-        SendDataToClient(client_socketfd, "FILE_NOT_FOUND", sizeof("FILE_NOT_FOUND"));
-        return;
+        SendDataToClient(client_socketfd, "FILE_NOT_FOUND");
+        return -1;
     }
 
     //get the number of lines in the file
@@ -448,8 +391,8 @@ void Server::ViewFile(int client_socketfd, const std::string &filename, int star
     if(end_line > line_number || start_line > line_number )
     {
         //send the failure msg with start and end line of the file to client
-        std::string msg = std::string("INVALID_LINE_NUMBER Choose between ") + std::to_string(1) + " and " + std::to_string(line_number);
-        SendDataToClient(client_socketfd, msg, msg.length());
+        std::string msg = std::string("INVALID_LINE_NUMBER : Choose between ") + std::to_string(1) + " and " + std::to_string(line_number);
+        SendDataToClient(client_socketfd, msg);
 
     }else{
 
@@ -462,7 +405,7 @@ void Server::ViewFile(int client_socketfd, const std::string &filename, int star
         {
             /* send line with line number to client */
             std::string line_with_number = std::to_string(i) + " " + line + "\n";
-            send(client_socketfd, line_with_number.c_str(), strlen(line_with_number.c_str()), 0);
+            SendDataToClient(client_socketfd, line_with_number);
             if (end_line != -1 && i == end_line)
             {
                 file.close();
@@ -473,7 +416,7 @@ void Server::ViewFile(int client_socketfd, const std::string &filename, int star
     }
     file.close();
     }
-    char buff[1024];
-    memset(buff, 0, sizeof(buff));
-    write(client_socketfd, buff, 1024);
+    memset(buffer, 0, sizeof(buffer));
+    send(client_socketfd, buffer,MAX_SIZE,0);
+    return 0;
 }

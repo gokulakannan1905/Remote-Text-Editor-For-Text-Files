@@ -31,6 +31,7 @@ int main()
     {
         Client client;
         sockid = client.GetSocketfd();
+        client.CreateSocket();
 
         /* register the signal handler for ctrl+c */
         signal(SIGINT, signalHandler);
@@ -72,8 +73,8 @@ int main()
         /* authenticate user */
         if (client.AuthenticateUser(username, password))
         {
-            if(username!="anonymous")
-            std::cout << "AUTHENTICATED" << std::endl;
+            if (username != "anonymous")
+                std::cout << "AUTHENTICATED" << std::endl;
             while (true)
             {
                 /* get user input */
@@ -97,13 +98,13 @@ int main()
                 std::string subcommand = command.substr(0, command.find(" "));
 
                 if ((subcommand == "ls" || subcommand == "pwd") && arguments == 0)
-                    client.SendDataToServer(command, strlen(command.c_str()));
+                    client.SendDataToServer(command);
                 else if (subcommand == "cd" && arguments <= 1)
-                    client.SendDataToServer(command, strlen(command.c_str()));
+                    client.SendDataToServer(command);
                 else if (subcommand == "print" && arguments <= 2)
                 {
                     if (arguments == 0)
-                        client.SendDataToServer(command, strlen(command.c_str()));
+                        client.SendDataToServer(command);
                     else if (arguments == 1)
                     {
                         /* check 2nd argument is a number */
@@ -115,13 +116,13 @@ int main()
                             std::cerr << "Value must be a number" << std::endl;
                             continue;
                         }
-                        if(number <= 0)
+                        if (number <= 0)
                         {
                             std::cerr << "Value should be greater than 0" << std::endl;
                             continue;
                         }
                         /* send command to server */
-                        client.SendDataToServer(command, strlen(command.c_str()));
+                        client.SendDataToServer(command);
                     }
                     else
                     {
@@ -134,7 +135,7 @@ int main()
                             std::cerr << "Value 1 must be a number" << std::endl;
                             continue;
                         }
-                        if(number1 <= 0)
+                        if (number1 <= 0)
                         {
                             std::cerr << "Value 1 should be greater than 0" << std::endl;
                             continue;
@@ -145,13 +146,13 @@ int main()
                             std::cerr << "Value 2 must be a number" << std::endl;
                             continue;
                         }
-                        if(number2 <= 0)
+                        if (number2 <= 0)
                         {
                             std::cerr << "Value 2 should be greater than 0" << std::endl;
                             continue;
                         }
                         /* send command to server */
-                        client.SendDataToServer(command, strlen(command.c_str()));
+                        client.SendDataToServer(command);
                     }
                 }
                 else if (subcommand == "edit" && arguments == 1)
@@ -165,21 +166,21 @@ int main()
                         std::cerr << "Value must be a number" << std::endl;
                         continue;
                     }
-                    if(number <= 0)
+                    if (number <= 0)
                     {
                         std::cerr << "Value should be greater than 0" << std::endl;
                         continue;
                     }
-                    client.SendDataToServer(command, strlen(command.c_str()));
+                    client.SendDataToServer(command);
                 }
                 else if (subcommand == "select" && arguments == 1)
-                    client.SendDataToServer(command, strlen(command.c_str()));
+                    client.SendDataToServer(command);
                 else if (subcommand == "bye" && arguments == 0)
                 {
                     client.DisconnectClient();
-                    exit(0);
+                    break;
                 }
-                else if (subcommand == "clear" || subcommand == "cls" || subcommand == "c")
+                else if (subcommand == "clear" || subcommand == "c")
                 {
                     system("clear");
                     continue;
@@ -222,8 +223,12 @@ int main()
                     client.ReceiveDataFromServer();
             }
         }
-        std::cerr << "AUTHENTICATION_FAILED try again...\n" << std::endl;
-        client.DisconnectClient();
+        else
+        {
+            std::cerr << "AUTHENTICATION_FAILED try again...\n"
+                      << std::endl;
+            client.DisconnectClient();
+        }
     }
     return 0;
 }
