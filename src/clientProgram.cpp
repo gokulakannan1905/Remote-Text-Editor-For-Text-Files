@@ -21,7 +21,7 @@ void signalHandler(int signum)
     if (signum == SIGINT)
     {
         // send bye to server
-        write(sockid, "bye", 3);
+        send(sockid, "bye", 3,0);
         exit(0);
     }
 }
@@ -33,8 +33,8 @@ int main()
         try
         {
             Client client;
-            sockid = client.GetSocketfd();
             client.CreateSocket();
+            sockid = client.GetSocketfd();
 
             /* register the signal handler for ctrl+c */
             signal(SIGINT, signalHandler);
@@ -84,6 +84,11 @@ int main()
                     std::string input;
                     std::cout << "Enter command-$: ";
                     std::getline(std::cin, input);
+                    if (feof(stdin))
+                    {
+                        client.DisconnectClient();
+                        exit(0);
+                    }
 
                     std::stringstream ss(input);
                     int arguments = -1;
@@ -144,7 +149,7 @@ int main()
                         {
                             std::cout << "help - print list of commands\nsubcommand are passed as arguments" << std::endl;
                         }
-                        else if(help_command == "clear")
+                        else if (help_command == "clear")
                         {
                             std::cout << "clear - clear the screen\nNo arguments are needed" << std::endl;
                         }
