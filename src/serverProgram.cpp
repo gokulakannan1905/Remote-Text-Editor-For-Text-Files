@@ -9,9 +9,11 @@
 #include <unistd.h>
 #include <sstream>
 #include <server.h>
+#include <exception>
 
 int main()
 {
+    try{
     // create server object
     Server server;
     server.LoadUsersData();
@@ -140,6 +142,11 @@ int main()
             signal(SIGCHLD, SIG_IGN);
             close(clientfd);
         }
+    }
+    }
+    catch(std::exception &e)
+    {
+        std::cout << e.what() << std::endl;
     }
     return 0;
 }

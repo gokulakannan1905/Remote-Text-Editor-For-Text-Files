@@ -3,7 +3,7 @@
 #include <user.h>
 #include <fstream>
 #include <iostream>
-
+#define DIR "../data/home/"
 /*
  * Constructor for the user class.
  */
@@ -11,7 +11,7 @@ User::User(const std::string &name, const std::string &password)
 {
     this->name = name;
     this->password = password;
-    this->dir = "../data/home/" + name;
+    this->dir = DIR + name;
 }
 
 
@@ -29,7 +29,7 @@ std::string User::GetName()
 int User::ChangeDir(const std::string &dir)
 {
     if (dir.empty())
-    this->dir = "../data/home/" + name;
+    this->dir = DIR + name;
     else
     this->dir = dir;
     return 0;
