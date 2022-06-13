@@ -5,17 +5,17 @@
 > 
 > - First, using *make* utility build the project
 > 
->       make
+>       cd makefile/ && make
 > 
 > - change directory to bin/
 > 
->       cd bin/
+>       cd ..bin/
 > 
-> - Start the server program
+> - Start the server program from bin directory
 > 
 >       ./server
 >       
-> - Start the client program
+> - Start the client program from bin directory
 > 
 >       ./client
 >       
@@ -30,3 +30,4 @@
     6. edit <LINE_NUM>
     7. bye
     8. clear or c
+    9. help <command>
