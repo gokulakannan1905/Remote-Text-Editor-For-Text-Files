@@ -3,7 +3,7 @@
 #include <user.h>
 #include <fstream>
 #include <iostream>
-
+#define DIR "../data/home/"
 /*
  * Constructor for the user class.
  */
@@ -11,7 +11,7 @@ User::User(const std::string &name, const std::string &password)
 {
     this->name = name;
     this->password = password;
-    this->dir = "../data/home/" + name;
+    this->dir = DIR + name;
 }
 
 
@@ -26,16 +26,13 @@ std::string User::GetName()
 /*
  * changes the directory of the user.
  */
-void User::ChangeDir(const std::string &dir)
+int User::ChangeDir(const std::string &dir)
 {
     if (dir.empty())
-    {
-        this->dir = "../data/home/" + name;
-    }
+    this->dir = DIR + name;
     else
-    {
-        this->dir = dir;
-    }
+    this->dir = dir;
+    return 0;
 }
 
 /*
@@ -53,23 +50,3 @@ bool User::operator==(const User &user)
 {
     return (this->name == user.name && this->password == user.password);
 }
-
-/*
- * to store the data of the user in a file.
- * This is not a requirement but it is added for testing purpose.
-
-void User::StoreData()
-{
-    std::ofstream file;
-    file.open("../data/users.txt", std::ios::app);
-    // handle the error if file is not opened
-    if (!file.is_open())
-    {
-        std::cerr << "Error opening file" << std::endl;
-        return;
-    }
-    // store the user name : password : dir in the file
-    file << this->name << " " << this->password << " " << this->dir << std::endl;
-    file.close();
-}
-*/

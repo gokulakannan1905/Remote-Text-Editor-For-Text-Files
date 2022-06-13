@@ -1,4 +1,4 @@
-/* TCP server program starts here */
+/* TCP server driver program */
 
 #include <iostream>
 #include <string.h>
@@ -9,18 +9,21 @@
 #include <unistd.h>
 #include <sstream>
 #include <server.h>
+#include <exception>
 
 int main()
 {
+    try{
     // create server object
     Server server;
+    server.LoadUsersData();
     while (1)
     {
         // accept connection from client and store the socket descriptor
         int clientfd = server.AcceptConnections();
 
         // send confirmation message to client
-        server.SendDataToClient(clientfd, "Connected to server", 20);
+        server.SendDataToClient(clientfd, "Connected to server");
 
         // create child process
         pid_t pid = fork();
@@ -81,7 +84,7 @@ int main()
                     }
                     else if (command == "pwd")
                     {
-                        server.SendDataToClient(clientfd, dir, dir.length());
+                        server.SendDataToClient(clientfd, dir);
                     }
                     else if (command == "cd")
                     {
@@ -94,14 +97,14 @@ int main()
                         int line_number;
                         ss >> line_number;
                         if (filename.empty())
-                            server.SendDataToClient(clientfd, "0", 1);
+                            server.SendDataToClient(clientfd, "0");
                         else
                             server.EditLine(clientfd, filename, line_number);
                     }
                     else if (command == "print")
                     {
                         if (filename.empty())
-                            server.SendDataToClient(clientfd, "0", 1);
+                            server.SendDataToClient(clientfd, "0");
                         else
                         {
                             int start_line = 1, end_line = -1;
@@ -122,7 +125,7 @@ int main()
                     }
                     else
                     {
-                        server.SendDataToClient(clientfd, "Invalid command", strlen("Invalid command"));
+                        server.SendDataToClient(clientfd, "Invalid command");
                     }
                 }
             }
@@ -137,6 +140,11 @@ int main()
             signal(SIGCHLD, SIG_IGN);
             close(clientfd);
         }
+    }
+    }
+    catch(std::exception &e)
+    {
+        std::cout << e.what() << std::endl;
     }
     return 0;
 }

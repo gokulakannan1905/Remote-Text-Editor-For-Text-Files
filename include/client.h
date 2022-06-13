@@ -11,25 +11,22 @@
 
 class Client
 {
+public:
+    Client();
+    int CreateSocket();
+    int GetSocketfd();
+    int ConnectToServer();
+    bool AuthenticateUser(const std::string &username, const std::string &password);
+    int SendDataToServer(const std::string &data);
+    char* ReceiveDataFromServer();
+    int DisconnectClient();
+    int EditLine();
+    int ReceiveFile();
 private:
     int socketfd;
     struct sockaddr_in server_addr;
-    int port_number;
-    std::string ip_address;
     bool isConnected;
-
-public:
-    Client();
-    int GetSocketfd();
-    void ConnectToServer();
-    bool AuthenticateUser(const std::string &username, const std::string &password);
-    void SendDataToServer(const std::string &data, size_t size);
-    void ReceiveDataFromServer();
-    void CreateUser(const std::string &username,std::string &password);
-    void DisconnectClient();
-    void EditLine();
-    void ReceiveFile();
-    ~Client();
+    char buffer[MAX_SIZE];
 };
 
 #endif

@@ -10,31 +10,28 @@
 #include <netinet/in.h>
 #include <vector>
 #include <user.h>
+#define MAX_SIZE 1024
 
 class Server
 {
+public:
+    Server();
+    int LoadUsersData();
+    int AcceptConnections();
+    char* ReceiveDataFromClient(int clientfd);
+    int SendDataToClient(int clientfd, const std::string &data);
+    bool AuthenticateUser(int clientfd, const User &user);
+    int ListDirContents(int clientfd, const std::string &dir);
+    int ChangeDir(const std::string &dir, User &user, int clientfd);
+    int EditLine(int clientfd, const std::string &file, int linenum);
+    int ViewFile(int clientfd, const std::string &file, int start, int end);
+    int SelectFile(std::string &filename, const std::string &dir, int clientfd);
 private:
     int socketfd;
     struct sockaddr_in server_addr, client_addr;
     socklen_t client_addr_size;
-    int port_number;
-    std::string ip_address;
     std::vector<User> users;
-    std::vector<std::string> ip_blacklist;
-
-public:
-    Server();
-    int AcceptConnections();
-    std::string ReceiveDataFromClient(int);
-    void SendDataToClient(int clientfd, const std::string &data, size_t size);
-    bool AuthenticateUser(int clientfd, const User &user);
-    void CreateUser(int clientfd, User user);
-    void ListDirContents(int clientfd, const std::string &dir);
-    void ChangeDir(const std::string &dir, User &user, int clientfd);
-    void EditLine(int clientfd, const std::string &file, int linenum);
-    void ViewFile(int clientfd, const std::string &file, int start_line_no, int end_line_no);
-    void SelectFile(std::string &filename, const std::string &dir, int clientfd);
-    ~Server();
+    char buffer[MAX_SIZE];
 };
 
 #endif
