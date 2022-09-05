@@ -68,6 +68,13 @@ Server::Server()
     }
 }
 
+Server::~Server()
+{
+    std::cout << "Server shutting down..." << std::endl;
+    close(socketfd);
+}
+
+
 int Server::LoadUsersData(){
     /* read data from ../data/users.txt file and store it in users vector */
     std::ifstream file;
@@ -121,7 +128,7 @@ char* Server::ReceiveDataFromClient(int client_socketfd)
     {
         /* display error to stderr */
         perror("recv");
-        return NULL;
+        return "";
     }
     return buffer;
 }
@@ -289,6 +296,7 @@ int Server::SelectFile(std::string &filename,const std::string &dirname, int cli
     return -1;
 }
 
+
 /*
  * This function is responsible for handling the edit request.
  */
@@ -298,7 +306,6 @@ int Server::EditLine(int client_socketfd,const std::string &filename, int line_n
     std::ifstream file(filename);
     if (!file.is_open())
     {
-        /* display error to stderr */
         SendDataToClient(client_socketfd, "FILE_NOT_FOUND");
         return -1;
     }
@@ -321,12 +328,23 @@ int Server::EditLine(int client_socketfd,const std::string &filename, int line_n
 
     /* send the selected line with line_number to client */
     line.clear();
-    line = std::to_string(line_number) + ":" + lines[line_number - 1];
+    int space_count = 0;
+    for (auto ch : lines[line_number-1]){
+        if (ch == ' '){
+            space_count++;
+        }else{
+            break;
+        }
+    }
+    std::string trimmed_line = lines[line_number-1].substr(space_count);
+    line = std::to_string(line_number) + ":" + trimmed_line;
     SendDataToClient(client_socketfd, line);
 
     /* receive the edited line from client */
     memset(buffer, 0, sizeof(buffer));
     recv(client_socketfd, buffer, sizeof(buffer), 0);
+    
+    std::cout << "Changes received from client: " << buffer << std::endl;
 
     //again load the file in a vector
     std::ifstream file1(filename);
@@ -344,12 +362,20 @@ int Server::EditLine(int client_socketfd,const std::string &filename, int line_n
     }   
     /* close file */
     file1.close();
+
     /* replace the line in the vector */
-    if(strcmp(buffer,"0")!=0)
-    lines[line_number - 1] = buffer;
+    if(strcmp(buffer,"0")!=0){
+        trimmed_line.clear();
+        while(space_count--){
+            trimmed_line+= ' ';
+        }
+        trimmed_line += buffer;
+    lines[line_number - 1] = trimmed_line;
+    }
 
     /* open file in write mode */
     std::ofstream file_write(filename);
+
     /* write the vector to file */
     for (auto single_line : lines)
     {
